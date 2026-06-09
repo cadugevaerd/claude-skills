@@ -11,6 +11,18 @@ A `grillme-gestor` é a versão não-técnica: o gestor descreve o processo em l
 
 ## Instalação (global)
 
+### Para o gestor — instalar APENAS a `grillme-gestor`
+
+Uma linha no PowerShell:
+
+```powershell
+irm https://raw.githubusercontent.com/cadugevaerd/grillme-langgraph-skills/main/install-gestor.ps1 | iex
+```
+
+Depois, abra o Claude Code e use `/grillme-gestor`. (Requer o Claude Code instalado.)
+
+### Instalar as duas skills
+
 Uma linha no PowerShell — instala em `~/.claude/skills` e fica disponível em qualquer sessão:
 
 ```powershell
