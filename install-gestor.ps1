@@ -45,7 +45,7 @@ if ((Test-Path $Dest) -and -not $Force) {
 New-Item -ItemType Directory -Force -Path $Dest | Out-Null
 
 foreach ($rel in $SkillFiles) {
-    $url     = "https://raw.githubusercontent.com/$Repo/$Ref/skills/$Skill/$rel"
+    $url     = "https://raw.githubusercontent.com/$Repo/$Ref/plugins/$Skill/skills/$Skill/$rel"
     $outPath = Join-Path $Dest ($rel -replace '/', '\')
     New-Item -ItemType Directory -Force -Path (Split-Path $outPath -Parent) | Out-Null
     try {

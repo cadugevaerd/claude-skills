@@ -8,15 +8,39 @@ Coleção de [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) 
 | **`grillme-langgraph`** | Entrevista técnica que transforma a descrição de um processo no rascunho de um fluxo **LangGraph** — diagrama do grafo, schema do State (Regra CRUE), tabela de nodes determinístico vs não-determinístico. |
 | **`grillme-gestor`** | Versão não-técnica da `grillme-langgraph`: o gestor descreve o processo em linguagem comum (sem jargão) e recebe **o mesmo** artefato técnico em markdown. |
 
-## Instalação (global)
+## Instalação
 
-Uma linha no PowerShell — o instalador descobre as skills do repositório e abre um **menu para selecionar quais instalar**:
+### Recomendada — plugin do Claude Code (Windows, Linux e macOS)
+
+O repo é um **plugin marketplace** do Claude Code: mesmo comando em qualquer SO,
+sem dependências além do próprio Claude Code. No terminal:
+
+```bash
+claude plugin marketplace add cadugevaerd/claude-skills
+claude plugin install backlog@claude-skills          # só a que você quer
+claude plugin install grillme-gestor@claude-skills
+```
+
+Ou dentro de uma sessão do Claude Code:
+
+```
+/plugin marketplace add cadugevaerd/claude-skills
+/plugin install backlog@claude-skills
+```
+
+Atualizações depois: `claude plugin update backlog@claude-skills` (ou
+`/plugin marketplace update claude-skills`).
+
+### Alternativa — instalador PowerShell (Windows)
+
+O instalador descobre as skills do repositório e abre um **menu para selecionar
+quais instalar** em `~/.claude/skills`:
 
 ```powershell
 irm https://raw.githubusercontent.com/cadugevaerd/claude-skills/main/install.ps1 | iex
 ```
 
-Sem menu (direto ao ponto), clonando o repo ou com o script local:
+Sem menu (direto ao ponto), com o script local:
 
 ```powershell
 .\install.ps1 -Skills backlog              # instala apenas uma
@@ -25,21 +49,19 @@ Sem menu (direto ao ponto), clonando o repo ou com o script local:
 .\install.ps1 -Force                       # sobrescreve sem perguntar
 ```
 
-### Para o gestor — instalar APENAS a `grillme-gestor`
+Para o gestor — instalar APENAS a `grillme-gestor`:
 
 ```powershell
 irm https://raw.githubusercontent.com/cadugevaerd/claude-skills/main/install-gestor.ps1 | iex
 ```
 
-Depois, abra o Claude Code e use `/grillme-gestor`. (Requer o Claude Code instalado.)
-
 ### Instalação manual (qualquer SO)
 
-Copie as pastas desejadas de `skills/` para `~/.claude/skills/`:
+Copie as pastas desejadas de `plugins/<nome>/skills/` para `~/.claude/skills/`:
 
 ```bash
 git clone https://github.com/cadugevaerd/claude-skills.git
-cp -r claude-skills/skills/backlog ~/.claude/skills/
+cp -r claude-skills/plugins/backlog/skills/backlog ~/.claude/skills/
 ```
 
 Reinicie o Claude Code (ou abra uma nova sessão).

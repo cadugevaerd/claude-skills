@@ -1,0 +1,8 @@
+{
+  "name": "backlog",
+  "version": "1.0.0",
+  "description": "Fonte da verdade de itens diferidos (.specify/backlog.json): registra, tria, promove e resolve features/bugs/débitos técnicos, com bootstrap da estrutura e varredura de TODOs soltos.",
+  "author": {
+    "name": "Carlos Araujo"
+  }
+}

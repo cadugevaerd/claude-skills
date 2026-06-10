@@ -43,19 +43,22 @@ function Write-Ok([string]$msg)   { Write-Host "    $msg" -ForegroundColor Green
 function Write-Warn([string]$msg) { Write-Host "    $msg" -ForegroundColor Yellow }
 
 # --- Descobre dinamicamente as skills e seus arquivos (GitHub API) ---
+# Layout do repo: plugins/<plugin>/skills/<skill>/<arquivos>
 Write-Step "Consultando skills disponíveis em $Repo@$Ref"
 $tree = Invoke-RestMethod -Uri "https://api.github.com/repos/$Repo/git/trees/${Ref}?recursive=1" -UseBasicParsing
 $skillFiles = @{}
+$skillUrlBase = @{}
 foreach ($item in $tree.tree) {
-    if ($item.type -eq 'blob' -and $item.path -match '^skills/([^/]+)/(.+)$') {
-        $name = $Matches[1]
-        $rel  = $Matches[2]
-        if (-not $skillFiles.ContainsKey($name)) { $skillFiles[$name] = @() }
+    if ($item.type -eq 'blob' -and $item.path -match '^(plugins/[^/]+/skills/([^/]+))/(.+)$') {
+        $base = $Matches[1]
+        $name = $Matches[2]
+        $rel  = $Matches[3]
+        if (-not $skillFiles.ContainsKey($name)) { $skillFiles[$name] = @(); $skillUrlBase[$name] = $base }
         $skillFiles[$name] += $rel
     }
 }
 $available = @($skillFiles.Keys | Sort-Object)
-if ($available.Count -eq 0) { throw "Nenhuma skill encontrada em $Repo (pasta skills/)." }
+if ($available.Count -eq 0) { throw "Nenhuma skill encontrada em $Repo (pasta plugins/*/skills/)." }
 
 # --- Resolve a seleção ---
 if ($Skills) {
@@ -111,7 +114,7 @@ foreach ($skill in $targets) {
     }
 
     foreach ($rel in $skillFiles[$skill]) {
-        $url     = "https://raw.githubusercontent.com/$Repo/$Ref/skills/$skill/$rel"
+        $url     = "https://raw.githubusercontent.com/$Repo/$Ref/$($skillUrlBase[$skill])/$rel"
         $outPath = Join-Path $dest ($rel -replace '/', '\')
         $outDir  = Split-Path $outPath -Parent
         New-Item -ItemType Directory -Force -Path $outDir | Out-Null

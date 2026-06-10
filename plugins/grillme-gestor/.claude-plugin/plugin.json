@@ -1,0 +1,8 @@
+{
+  "name": "grillme-gestor",
+  "version": "1.0.0",
+  "description": "Versão não-técnica da grillme-langgraph: o gestor descreve o processo em linguagem comum e recebe o mesmo artefato técnico LangGraph em markdown.",
+  "author": {
+    "name": "Carlos Araujo"
+  }
+}

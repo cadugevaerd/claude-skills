@@ -1,0 +1,45 @@
+{
+  "$schema": "https://api.claude.ai/schemas/marketplace-v1.json",
+  "name": "claude-skills",
+  "version": "1.0.0",
+  "description": "Marketplace de Agent Skills para Claude Code — backlog, grillme-langgraph, grillme-gestor",
+  "owner": {
+    "name": "Carlos Araujo",
+    "email": "cadu.gevaerd@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "backlog",
+      "description": "Fonte da verdade de itens diferidos (.specify/backlog.json): registra, tria, promove e resolve features/bugs/débitos técnicos. Faz bootstrap da estrutura no projeto (JSON + BACKLOG.md + seção no CLAUDE.md) e migra TODOs/FIXMEs soltos a cada execução.",
+      "source": "./plugins/backlog",
+      "version": "1.0.0",
+      "author": {
+        "name": "Carlos Araujo"
+      },
+      "category": "productivity",
+      "tags": ["backlog", "todo", "debt", "triage", "speckit", "workflow"]
+    },
+    {
+      "name": "grillme-langgraph",
+      "description": "Entrevista técnica que transforma a descrição de um processo no rascunho de um fluxo LangGraph — diagrama do grafo, schema do State (Regra CRUE), tabela de nodes determinístico vs não-determinístico.",
+      "source": "./plugins/grillme-langgraph",
+      "version": "1.0.0",
+      "author": {
+        "name": "Carlos Araujo"
+      },
+      "category": "development",
+      "tags": ["langgraph", "langchain", "agents", "design", "interview"]
+    },
+    {
+      "name": "grillme-gestor",
+      "description": "Versão não-técnica da grillme-langgraph: o gestor descreve o processo em linguagem comum (sem jargão) e recebe o mesmo artefato técnico LangGraph em markdown.",
+      "source": "./plugins/grillme-gestor",
+      "version": "1.0.0",
+      "author": {
+        "name": "Carlos Araujo"
+      },
+      "category": "development",
+      "tags": ["langgraph", "gestor", "nao-tecnico", "design", "interview"]
+    }
+  ]
+}
