@@ -1,21 +1,24 @@
 <#
 .SYNOPSIS
-    Instala as skills grillme-langgraph e grillme-gestor no Claude Code globalmente.
+    Instala skills deste repositório no Claude Code globalmente (~/.claude/skills).
 
 .DESCRIPTION
-    Baixa as skills deste repositório do GitHub e as instala em ~/.claude/skills,
-    tornando-as disponíveis em qualquer sessão do Claude Code.
+    Descobre as skills disponíveis no repositório (pasta skills/), permite
+    selecionar quais instalar e as baixa para ~/.claude/skills, tornando-as
+    disponíveis em qualquer sessão do Claude Code.
 
     Uso remoto (uma linha):
-      irm https://raw.githubusercontent.com/cadugevaerd/grillme-langgraph-skills/main/install.ps1 | iex
+      irm https://raw.githubusercontent.com/cadugevaerd/claude-skills/main/install.ps1 | iex
 
     Uso local:
-      .\install.ps1
-      .\install.ps1 -Skills grillme-gestor          # instala apenas uma
-      .\install.ps1 -Force                           # sobrescreve sem perguntar
+      .\install.ps1                       # menu interativo de seleção
+      .\install.ps1 -Skills backlog       # instala apenas uma, sem menu
+      .\install.ps1 -Skills all           # todas, sem menu
+      .\install.ps1 -Force                # sobrescreve sem perguntar
 
 .PARAMETER Skills
-    Quais skills instalar. Padrão: ambas.
+    Quais skills instalar (nomes das pastas em skills/, ou 'all').
+    Sem o parâmetro, abre o menu de seleção.
 
 .PARAMETER Force
     Sobrescreve skills já instaladas sem pedir confirmação.
@@ -25,32 +28,73 @@
 #>
 [CmdletBinding()]
 param(
-    [ValidateSet('grillme-langgraph', 'grillme-gestor', 'all')]
-    [string[]] $Skills = @('all'),
+    [string[]] $Skills,
     [switch]   $Force,
     [string]   $Ref = 'main'
 )
 
 $ErrorActionPreference = 'Stop'
 
-$Repo        = 'cadugevaerd/grillme-langgraph-skills'
-$SkillsRoot  = Join-Path $HOME '.claude\skills'
-$AllSkills   = @('grillme-langgraph', 'grillme-gestor')
-
-# Arquivos que compõem cada skill (mesmo layout para as duas).
-$SkillFiles = @(
-    'SKILL.md',
-    'references/padrao-langgraph.md',
-    'assets/template-saida.md'
-)
+$Repo       = 'cadugevaerd/claude-skills'
+$SkillsRoot = Join-Path $HOME '.claude\skills'
 
 function Write-Step([string]$msg) { Write-Host "==> $msg" -ForegroundColor Cyan }
 function Write-Ok([string]$msg)   { Write-Host "    $msg" -ForegroundColor Green }
 function Write-Warn([string]$msg) { Write-Host "    $msg" -ForegroundColor Yellow }
 
-# Resolve a lista final de skills.
-if ($Skills -contains 'all') { $targets = $AllSkills } else { $targets = $Skills }
+# --- Descobre dinamicamente as skills e seus arquivos (GitHub API) ---
+Write-Step "Consultando skills disponíveis em $Repo@$Ref"
+$tree = Invoke-RestMethod -Uri "https://api.github.com/repos/$Repo/git/trees/${Ref}?recursive=1" -UseBasicParsing
+$skillFiles = @{}
+foreach ($item in $tree.tree) {
+    if ($item.type -eq 'blob' -and $item.path -match '^skills/([^/]+)/(.+)$') {
+        $name = $Matches[1]
+        $rel  = $Matches[2]
+        if (-not $skillFiles.ContainsKey($name)) { $skillFiles[$name] = @() }
+        $skillFiles[$name] += $rel
+    }
+}
+$available = @($skillFiles.Keys | Sort-Object)
+if ($available.Count -eq 0) { throw "Nenhuma skill encontrada em $Repo (pasta skills/)." }
 
+# --- Resolve a seleção ---
+if ($Skills) {
+    if ($Skills -contains 'all') {
+        $targets = $available
+    }
+    else {
+        $invalid = @($Skills | Where-Object { $_ -notin $available })
+        if ($invalid.Count -gt 0) {
+            throw "Skill(s) inexistente(s): $($invalid -join ', '). Disponíveis: $($available -join ', ')"
+        }
+        $targets = $Skills
+    }
+}
+else {
+    Write-Host ""
+    Write-Host "Skills disponíveis:" -ForegroundColor Cyan
+    for ($i = 0; $i -lt $available.Count; $i++) {
+        $mark = ''
+        if (Test-Path (Join-Path $SkillsRoot $available[$i])) { $mark = '  (já instalada)' }
+        Write-Host ("  [{0}] {1}{2}" -f ($i + 1), $available[$i], $mark)
+    }
+    Write-Host ""
+    $answer = Read-Host "Quais instalar? (números separados por vírgula, ou Enter = todas)"
+    if ([string]::IsNullOrWhiteSpace($answer)) {
+        $targets = $available
+    }
+    else {
+        $targets = @()
+        foreach ($n in ($answer -split '[,\s]+' | Where-Object { $_ })) {
+            $idx = [int]$n - 1
+            if ($idx -lt 0 -or $idx -ge $available.Count) { throw "Opção inválida: $n" }
+            $targets += $available[$idx]
+        }
+        $targets = @($targets | Select-Object -Unique)
+    }
+}
+
+Write-Host ""
 Write-Step "Instalando skills do Claude Code: $($targets -join ', ')"
 Write-Host "    Destino: $SkillsRoot"
 Write-Host ""
@@ -66,8 +110,8 @@ foreach ($skill in $targets) {
         if ($answer -notmatch '^[sSyY]') { Write-Warn "Pulada."; continue }
     }
 
-    foreach ($rel in $SkillFiles) {
-        $url = "https://raw.githubusercontent.com/$Repo/$Ref/skills/$skill/$rel"
+    foreach ($rel in $skillFiles[$skill]) {
+        $url     = "https://raw.githubusercontent.com/$Repo/$Ref/skills/$skill/$rel"
         $outPath = Join-Path $dest ($rel -replace '/', '\')
         $outDir  = Split-Path $outPath -Parent
         New-Item -ItemType Directory -Force -Path $outDir | Out-Null

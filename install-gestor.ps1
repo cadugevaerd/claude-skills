@@ -8,7 +8,7 @@
     disponivel em qualquer sessao do Claude Code.
 
     Uso (uma linha no PowerShell):
-      irm https://raw.githubusercontent.com/cadugevaerd/grillme-langgraph-skills/main/install-gestor.ps1 | iex
+      irm https://raw.githubusercontent.com/cadugevaerd/claude-skills/main/install-gestor.ps1 | iex
 #>
 [CmdletBinding()]
 param(
@@ -18,7 +18,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$Repo       = 'cadugevaerd/grillme-langgraph-skills'
+$Repo       = 'cadugevaerd/claude-skills'
 $Skill      = 'grillme-gestor'
 $SkillsRoot = Join-Path $HOME '.claude\skills'
 $Dest       = Join-Path $SkillsRoot $Skill
