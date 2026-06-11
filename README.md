@@ -5,7 +5,7 @@ Coleção de [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) 
 | Skill | O que faz |
 |-------|-----------|
 | **`backlog`** | Fonte da verdade de itens diferidos (`.specify/backlog.json`): registra, tria, promove e resolve features/bugs/débitos técnicos. Faz bootstrap da estrutura no projeto (JSON + `BACKLOG.md` + seção no `CLAUDE.md`) e, a cada execução, varre o projeto migrando TODOs/FIXMEs soltos e listas de pendências para a fonte da verdade. |
-| **`code-review-cadu`** | Code review de PR com **veredicto GO/NO-GO por finding**: GO = corrigir nesta PR antes do merge; NO-GO = registrar no backlog (`.specify/backlog.json` via skill `/backlog`, após confirmação). Fork do plugin oficial `code-review` da Anthropic (Apache-2.0). |
+| **`code-review-cadu`** | Code review de PR com **veredicto GO/NO-GO por finding** (sobre o merge): NO-GO = merge bloqueado, corrigir nesta PR; GO = merge pode seguir, finding diferível → backlog (`.specify/backlog.json` via skill `/backlog`, após confirmação). Fork do plugin oficial `code-review` da Anthropic (Apache-2.0). |
 | **`grillme-langgraph`** | Entrevista técnica que transforma a descrição de um processo no rascunho de um fluxo **LangGraph** — diagrama do grafo, schema do State (Regra CRUE), tabela de nodes determinístico vs não-determinístico. |
 | **`grillme-gestor`** | Versão não-técnica da `grillme-langgraph`: o gestor descreve o processo em linguagem comum (sem jargão) e recebe **o mesmo** artefato técnico em markdown. |
 
@@ -95,7 +95,7 @@ Opera a fonte da verdade única de trabalho diferido do projeto (`.specify/backl
 
 ### code-review-cadu
 
-Fork do plugin oficial `code-review` da Anthropic (Apache-2.0), mantendo o pipeline original (gate de elegibilidade → 5 agentes revisores paralelos → scoring de confiança 0-100 → filtro ≥80 → comentário na PR) e adicionando a triagem: cada finding recebe **GO** (bloqueia merge: correctness, segurança, perda de dados, regressão, contrato com infra real) ou **NO-GO** (cleanup, refactor, débito, eficiência — diferível). O comentário na PR prefixa cada item com o veredicto; os NO-GO são apresentados ao usuário e, **só após confirmação**, registrados em lote no backlog do projeto via `/backlog`, com o `BL-NNNN` citado em cada um.
+Fork do plugin oficial `code-review` da Anthropic (Apache-2.0), mantendo o pipeline original (gate de elegibilidade → 5 agentes revisores paralelos → scoring de confiança 0-100 → filtro ≥80 → comentário na PR) e adicionando a triagem — o veredicto é sobre o **merge**: cada finding recebe **NO-GO** (merge bloqueado, corrigir nesta PR: correctness, segurança, perda de dados, regressão, contrato com infra real) ou **GO** (merge pode seguir: cleanup, refactor, débito, eficiência — diferível). O comentário na PR prefixa cada item com o veredicto; os GO são apresentados ao usuário e, **só após confirmação**, registrados em lote no backlog do projeto via `/backlog`, com o `BL-NNNN` citado em cada um.
 
 ### grillme-langgraph / grillme-gestor
 

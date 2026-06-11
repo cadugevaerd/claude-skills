@@ -1,15 +1,17 @@
 ---
 name: "code-review-cadu"
-description: "Code review de pull request com veredicto GO/NO-GO por finding — GO = corrigir nesta PR antes do merge; NO-GO = registrar no backlog do projeto (.specify/backlog.json via skill /backlog). Use quando for revisar uma PR do GitHub e quiser a triagem automática dos findings entre 'corrigir agora' e 'diferir para o backlog'. Fork personalizado (Cadu) do plugin oficial code-review da Anthropic."
+description: "Code review de pull request com veredicto GO/NO-GO por finding sobre o merge — NO-GO = merge bloqueado, corrigir nesta PR; GO = merge pode seguir, finding diferível registrado no backlog do projeto (.specify/backlog.json via skill /backlog). Use quando for revisar uma PR do GitHub e quiser a triagem automática dos findings entre 'bloqueia merge' e 'diferir para o backlog'. Fork personalizado (Cadu) do plugin oficial code-review da Anthropic."
 argument-hint: "<número ou URL da PR>"
 ---
 
 # Code Review (Cadu) — PR review with GO/NO-GO verdict
 
 Fork of the official Anthropic `code-review` plugin (Apache-2.0 — see the
-plugin's LICENSE file), extended with: a **GO/NO-GO verdict per finding** and
-**backlog integration** for deferred items (NO-GO → `.specify/backlog.json`
-via the `/backlog` skill).
+plugin's LICENSE file), extended with: a **GO/NO-GO verdict per finding** —
+the verdict is about the MERGE (**NO-GO** = merge blocked, fix in this PR;
+**GO** = merge may proceed, finding is deferrable) — and **backlog
+integration** for deferred items (GO → `.specify/backlog.json` via the
+`/backlog` skill).
 
 Provide a code review for the given pull request.
 
@@ -31,19 +33,19 @@ To do this, follow these steps precisely:
    d. 75: Highly confident. The agent double checked the issue, and verified that it is very likely it is a real issue that will be hit in practice. The existing approach in the PR is insufficient. The issue is very important and will directly impact the code's functionality, or it is an issue that is directly mentioned in the relevant CLAUDE.md.
    e. 100: Absolutely certain. The agent double checked the issue, and confirmed that it is definitely a real issue, that will happen frequently in practice. The evidence directly confirms this.
 6. Filter out any issues with a score less than 80. If there are no issues that meet this criteria, do not proceed.
-7. Assign a **verdict** to each issue that passed the filter, with a one-line justification:
-   - **GO** — must be fixed in this PR, before merge. Criteria: correctness, security, data loss/corruption, regression, or breaking the contract with real infrastructure.
-   - **NO-GO** — deferrable with no merge risk. Criteria: cleanup, refactor, technical debt, efficiency/style improvement, unlikely edge case.
+7. Assign a **verdict about the merge** to each issue that passed the filter, with a one-line justification:
+   - **NO-GO** — the merge must NOT proceed with this issue pending: fix it in this PR. Criteria: correctness, security, data loss/corruption, regression, or breaking the contract with real infrastructure.
+   - **GO** — the merge may proceed: the issue is deferrable with no merge risk. Criteria: cleanup, refactor, technical debt, efficiency/style improvement, unlikely edge case.
 8. Use a Haiku agent to repeat the eligibility check from #1, to make sure that the pull request is still eligible for code review.
 9. Use the gh bash command to comment back on the pull request with the result. When writing your comment, keep in mind to:
    a. Keep your output brief
    b. Avoid emojis
    c. Link and cite relevant code, files, and URLs
-   d. Prefix every issue with its verdict: `**[GO]**` or `**[NO-GO → backlog]**`
-10. Backlog flow for the NO-GO issues (NEVER register automatically):
+   d. Prefix every issue with its verdict: `**[NO-GO]**` (merge blocked, fix in this PR) or `**[GO → backlog]**` (merge may proceed, deferred)
+10. Backlog flow for the GO issues (NEVER register automatically):
     a. After posting the PR comment, present the user (in the conversation) a summary table: `# | finding | verdict | justification`.
-    b. Ask the user to confirm which NO-GO issues should go to the backlog.
-    c. After the user's OK, register the confirmed NO-GO issues in batch in the project's backlog (`.specify/backlog.json`) via the `/backlog` skill, and report the generated `BL-NNNN` id next to each finding.
+    b. Ask the user to confirm which GO issues should go to the backlog.
+    c. After the user's OK, register the confirmed GO issues in batch in the project's backlog (`.specify/backlog.json`) via the `/backlog` skill, and report the generated `BL-NNNN` id next to each finding.
     d. If the project does not have `.specify/backlog.json`, offer the `/backlog` bootstrap before registering.
 
 Examples of false positives, for steps 4 and 5:
@@ -69,17 +71,17 @@ Notes:
 
 ### Code review
 
-Found 3 issues (2 GO / 1 NO-GO):
+Found 3 issues (2 NO-GO / 1 GO):
 
-1. **[GO]** <brief description of bug> (CLAUDE.md says "<...>")
+1. **[NO-GO]** <brief description of bug> (CLAUDE.md says "<...>")
 
 <link to file and line with full sha1 + line range for context, note that you MUST provide the full sha and not use bash here, eg. https://github.com/anthropics/claude-code/blob/1d54823877c4de72b2316a64032a54afc404e619/README.md#L13-L17>
 
-2. **[GO]** <brief description of bug> (some/other/CLAUDE.md says "<...>")
+2. **[NO-GO]** <brief description of bug> (some/other/CLAUDE.md says "<...>")
 
 <link to file and line with full sha1 + line range for context>
 
-3. **[NO-GO → backlog]** <brief description of bug> (bug due to <file and code snippet>)
+3. **[GO → backlog]** <brief description of bug> (bug due to <file and code snippet>)
 
 <link to file and line with full sha1 + line range for context>
 
