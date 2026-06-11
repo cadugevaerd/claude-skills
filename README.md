@@ -1,6 +1,6 @@
 # claude-skills
 
-Coleção de [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) para Claude Code, instaláveis individualmente em `~/.claude/skills` (globais — disponíveis em qualquer sessão).
+Coleção de [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) para Claude Code, distribuídas como **plugin marketplace** — cada skill é um plugin, instalável individualmente e disponível em qualquer sessão.
 
 | Skill | O que faz |
 |-------|-----------|
@@ -16,9 +16,13 @@ O repo é um **plugin marketplace** do Claude Code: mesmo comando em qualquer SO
 sem dependências além do próprio Claude Code. No terminal:
 
 ```bash
+# 1. registrar o marketplace (uma vez)
 claude plugin marketplace add cadugevaerd/claude-skills
-claude plugin install backlog@claude-skills          # só a que você quer
+
+# 2. instalar só o que você quer
+claude plugin install backlog@claude-skills
 claude plugin install grillme-gestor@claude-skills
+claude plugin install grillme-langgraph@claude-skills
 ```
 
 Ou dentro de uma sessão do Claude Code:
@@ -28,8 +32,14 @@ Ou dentro de uma sessão do Claude Code:
 /plugin install backlog@claude-skills
 ```
 
-Atualizações depois: `claude plugin update backlog@claude-skills` (ou
-`/plugin marketplace update claude-skills`).
+Gerenciamento depois:
+
+```bash
+claude plugin list                                  # o que está instalado
+claude plugin update backlog@claude-skills          # atualiza um plugin (reinicie o Claude Code)
+claude plugin marketplace update claude-skills      # atualiza o catálogo do marketplace
+claude plugin uninstall backlog@claude-skills       # remove
+```
 
 ### Alternativa — instalador PowerShell (Windows)
 
