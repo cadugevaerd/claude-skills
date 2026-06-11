@@ -32,7 +32,7 @@ To do this, follow these steps precisely:
    c. 50: Moderately confident. The agent was able to verify this is a real issue, but it might be a nitpick or not happen very often in practice. Relative to the rest of the PR, it's not very important.
    d. 75: Highly confident. The agent double checked the issue, and verified that it is very likely it is a real issue that will be hit in practice. The existing approach in the PR is insufficient. The issue is very important and will directly impact the code's functionality, or it is an issue that is directly mentioned in the relevant CLAUDE.md.
    e. 100: Absolutely certain. The agent double checked the issue, and confirmed that it is definitely a real issue, that will happen frequently in practice. The evidence directly confirms this.
-6. Filter out any issues with a score less than 80. If there are no issues that meet this criteria, do not proceed.
+6. Filter out any issues with a score less than 75. If there are no issues that meet this criteria, do not proceed.
 7. Assign a **verdict about the merge** to each issue that passed the filter, with a one-line justification:
    - **NO-GO** — the merge must NOT proceed with this issue pending: fix it in this PR. Criteria: correctness, security, data loss/corruption, regression, or breaking the contract with real infrastructure.
    - **GO** — the merge may proceed: the issue is deferrable with no merge risk. Criteria: cleanup, refactor, technical debt, efficiency/style improvement, unlikely edge case.
