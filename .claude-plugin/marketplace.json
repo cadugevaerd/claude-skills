@@ -2,7 +2,7 @@
   "$schema": "https://api.claude.ai/schemas/marketplace-v1.json",
   "name": "claude-skills",
   "version": "1.0.0",
-  "description": "Marketplace de Agent Skills para Claude Code — backlog, grillme-langgraph, grillme-gestor",
+  "description": "Marketplace de Agent Skills para Claude Code — backlog, code-review-cadu, grillme-langgraph, grillme-gestor",
   "owner": {
     "name": "Carlos Araujo",
     "email": "cadu.gevaerd@gmail.com"
@@ -18,6 +18,17 @@
       },
       "category": "productivity",
       "tags": ["backlog", "todo", "debt", "triage", "speckit", "workflow"]
+    },
+    {
+      "name": "code-review-cadu",
+      "description": "Code review de PR com veredicto GO/NO-GO por finding: GO = corrigir antes do merge; NO-GO = registrar no backlog (.specify/backlog.json via skill /backlog, após confirmação do usuário). Fork do plugin oficial code-review da Anthropic (Apache-2.0).",
+      "source": "./plugins/code-review-cadu",
+      "version": "1.0.0",
+      "author": {
+        "name": "Carlos Araujo"
+      },
+      "category": "development",
+      "tags": ["code-review", "pull-request", "go-no-go", "backlog", "triage", "quality"]
     },
     {
       "name": "grillme-langgraph",

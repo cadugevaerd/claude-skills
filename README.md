@@ -5,6 +5,7 @@ Coleção de [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) 
 | Skill | O que faz |
 |-------|-----------|
 | **`backlog`** | Fonte da verdade de itens diferidos (`.specify/backlog.json`): registra, tria, promove e resolve features/bugs/débitos técnicos. Faz bootstrap da estrutura no projeto (JSON + `BACKLOG.md` + seção no `CLAUDE.md`) e, a cada execução, varre o projeto migrando TODOs/FIXMEs soltos e listas de pendências para a fonte da verdade. |
+| **`code-review-cadu`** | Code review de PR com **veredicto GO/NO-GO por finding**: GO = corrigir nesta PR antes do merge; NO-GO = registrar no backlog (`.specify/backlog.json` via skill `/backlog`, após confirmação). Fork do plugin oficial `code-review` da Anthropic (Apache-2.0). |
 | **`grillme-langgraph`** | Entrevista técnica que transforma a descrição de um processo no rascunho de um fluxo **LangGraph** — diagrama do grafo, schema do State (Regra CRUE), tabela de nodes determinístico vs não-determinístico. |
 | **`grillme-gestor`** | Versão não-técnica da `grillme-langgraph`: o gestor descreve o processo em linguagem comum (sem jargão) e recebe **o mesmo** artefato técnico em markdown. |
 
@@ -21,6 +22,7 @@ claude plugin marketplace add cadugevaerd/claude-skills
 
 # 2. instalar só o que você quer
 claude plugin install backlog@claude-skills
+claude plugin install code-review-cadu@claude-skills
 claude plugin install grillme-gestor@claude-skills
 claude plugin install grillme-langgraph@claude-skills
 ```
@@ -80,6 +82,7 @@ Reinicie o Claude Code (ou abra uma nova sessão).
 
 ```
 /backlog               # registrar/triar/promover itens diferidos (faz bootstrap se preciso)
+/code-review-cadu 42   # review da PR #42 com veredicto GO/NO-GO + backlog
 /grillme-langgraph     # design LangGraph — versão técnica
 /grillme-gestor        # design LangGraph — versão para o gestor
 ```
@@ -89,6 +92,10 @@ Reinicie o Claude Code (ou abra uma nova sessão).
 ### backlog
 
 Opera a fonte da verdade única de trabalho diferido do projeto (`.specify/backlog.json`, itens `BL-NNNN` com type/status/priority). Na primeira execução num projeto, cria a estrutura base e a instrução normativa no `CLAUDE.md`. Em toda execução, varre o projeto por backlog não estruturado (TODOs/FIXMEs soltos, `TODO.md`, listas de pendências) e migra para a estrutura padrão. Operações: `add`, `list`, `promote`, `resolve`, `discard`, `init`.
+
+### code-review-cadu
+
+Fork do plugin oficial `code-review` da Anthropic (Apache-2.0), mantendo o pipeline original (gate de elegibilidade → 5 agentes revisores paralelos → scoring de confiança 0-100 → filtro ≥80 → comentário na PR) e adicionando a triagem: cada finding recebe **GO** (bloqueia merge: correctness, segurança, perda de dados, regressão, contrato com infra real) ou **NO-GO** (cleanup, refactor, débito, eficiência — diferível). O comentário na PR prefixa cada item com o veredicto; os NO-GO são apresentados ao usuário e, **só após confirmação**, registrados em lote no backlog do projeto via `/backlog`, com o `BL-NNNN` citado em cada um.
 
 ### grillme-langgraph / grillme-gestor
 
