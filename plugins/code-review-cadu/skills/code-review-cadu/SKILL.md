@@ -32,7 +32,12 @@ To do this, follow these steps precisely:
    c. 50: Moderately confident. The agent was able to verify this is a real issue, but it might be a nitpick or not happen very often in practice. Relative to the rest of the PR, it's not very important.
    d. 75: Highly confident. The agent double checked the issue, and verified that it is very likely it is a real issue that will be hit in practice. The existing approach in the PR is insufficient. The issue is very important and will directly impact the code's functionality, or it is an issue that is directly mentioned in the relevant CLAUDE.md.
    e. 100: Absolutely certain. The agent double checked the issue, and confirmed that it is definitely a real issue, that will happen frequently in practice. The evidence directly confirms this.
-6. Filter out any issues with a score less than 75. If there are no issues that meet this criteria, do not proceed.
+
+   The scoring agent MUST end its reply with a final line in exactly this format: `SCORE: <integer 0-100>` — no prose after it.
+6. Coerce each score, then filter:
+   a. **Total coercion, never case enumeration.** The score arrives in an LLM reply — an open domain. Do not parse it by enumerating expected shapes ("if it looks like `NN`, elif `NN/100`, ..."). Coerce ANY reply to an integer: take the number from the final `SCORE:` line if present (match is case-insensitive and tolerates trailing prose; within that line the first number wins); otherwise take the last number anywhere in the reply; accept floats (`82.5` → 82), fractions (`85/100` → 85) and percents (`85%` → 85); clamp the result to [0, 100].
+   b. **Never drop a finding on a parse failure (fail-loud).** If no number can be extracted at all, re-run that scoring agent once; if the reply still cannot be coerced, treat the score as indeterminate: KEEP the finding, mark it `[score: indeterminate]`, and surface it to the user for a manual call — never silently discard it. A silent drop corrupts the review. Indeterminate findings get no verdict in step 7 and are NOT posted in the PR comment (step 9); list them only in the conversation for the user to decide.
+   c. Filter out issues with a coerced score below 75. If no issues remain (and none are indeterminate), do not proceed.
 7. Assign a **verdict about the merge** to each issue that passed the filter, with a one-line justification:
    - **NO-GO** — the merge must NOT proceed with this issue pending: fix it in this PR. Criteria: correctness, security, data loss/corruption, regression, or breaking the contract with real infrastructure.
    - **GO** — the merge may proceed: the issue is deferrable with no merge risk. Criteria: cleanup, refactor, technical debt, efficiency/style improvement, unlikely edge case.
@@ -61,6 +66,7 @@ Examples of false positives, for steps 4 and 5:
 
 Notes:
 
+- Every field you consume from an agent's reply (eligibility, summary, scores) is an open-domain LLM payload: demand a fixed output format in the agent's prompt, coerce totally on consumption (never by enumerating expected cases), and treat an uncoercible reply as indeterminate + visible — never as a silent default.
 - Do not check build signal or attempt to build or typecheck the app. These will run separately, and are not relevant to your code review.
 - Use `gh` to interact with Github (eg. to fetch a pull request, or to create inline comments), rather than web fetch
 - Make a todo list first
