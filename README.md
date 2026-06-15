@@ -82,6 +82,7 @@ Reinicie o Claude Code (ou abra uma nova sessão).
 
 ```
 /backlog               # registrar/triar/promover itens diferidos (faz bootstrap se preciso)
+/backlog format        # reorganizar: re-triar severidade + atribuir rank 1–100 (ordem de ataque)
 /code-review-cadu 42   # review da PR #42 com veredicto GO/NO-GO + backlog
 /grillme-langgraph     # design LangGraph — versão técnica
 /grillme-gestor        # design LangGraph — versão para o gestor
@@ -91,7 +92,7 @@ Reinicie o Claude Code (ou abra uma nova sessão).
 
 ### backlog
 
-Opera a fonte da verdade única de trabalho diferido do projeto (`.specify/backlog.json`, itens `BL-NNNN` com type/status/priority). Na primeira execução num projeto, cria a estrutura base e a instrução normativa no `CLAUDE.md`. Em toda execução, varre o projeto por backlog não estruturado (TODOs/FIXMEs soltos, `TODO.md`, listas de pendências) e migra para a estrutura padrão. Operações: `add`, `list`, `promote`, `resolve`, `discard`, `init`.
+Opera a fonte da verdade única de trabalho diferido do projeto (`.specify/backlog.json`, itens `BL-NNNN` com type/status/priority/rank). Na primeira execução num projeto, cria a estrutura base e a instrução normativa no `CLAUDE.md`. Em toda execução, varre o projeto por backlog não estruturado (TODOs/FIXMEs soltos, `TODO.md`, listas de pendências) e migra para a estrutura padrão. Operações: `add`, `list`, `format`, `promote`, `resolve`, `discard`, `init`. A `format` reorganiza o backlog — re-tria a **severidade** (4 níveis: crítica/alta/média/baixa) e atribui o **rank** 1–100 (ordem de ataque única, único por item), exibindo a proposta agrupada por severidade e gravando só após confirmação.
 
 ### code-review-cadu
 
