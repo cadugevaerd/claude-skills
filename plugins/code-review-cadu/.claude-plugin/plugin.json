@@ -1,6 +1,6 @@
 {
   "name": "code-review-cadu",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Code review de PR com veredicto GO/NO-GO por finding sobre o merge: NO-GO = merge bloqueado, corrigir nesta PR; GO = merge pode seguir, finding diferível registrado no backlog (.specify/backlog.json via skill /backlog, após confirmação). Fork do plugin oficial code-review da Anthropic (Apache-2.0).",
   "author": {
     "name": "Carlos Araujo"
