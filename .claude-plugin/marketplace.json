@@ -10,9 +10,9 @@
   "plugins": [
     {
       "name": "backlog",
-      "description": "Fonte da verdade de itens diferidos (.specify/backlog.json): registra, tria, promove e resolve features/bugs/débitos técnicos. Faz bootstrap da estrutura no projeto (JSON + BACKLOG.md + seção no CLAUDE.md) e migra TODOs/FIXMEs soltos a cada execução. A operação 'format' re-tria a severidade (4 níveis: critica/alta/media/baixa) e atribui o rank 1–100 (ordem de ataque única).",
+      "description": "Fonte da verdade GLOBAL de itens diferidos (~/.backlog/backlog.json): backlog único para TODOS os repos, com o repositório-alvo (campo `repo`) persistido em cada item — registra, tria, promove e resolve features/bugs/débitos de qualquer pasta. Faz bootstrap do store global e migra TODOs/FIXMEs do repo do CWD. A operação 'format' re-tria a severidade (4 níveis: critica/alta/media/baixa) e atribui o rank 1–100 por repo (ordem de ataque única daquele repo).",
       "source": "./plugins/backlog",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "author": {
         "name": "Carlos Araujo"
       },
