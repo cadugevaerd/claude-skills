@@ -2,7 +2,7 @@
   "$schema": "https://api.claude.ai/schemas/marketplace-v1.json",
   "name": "claude-skills",
   "version": "1.0.0",
-  "description": "Marketplace de Agent Skills para Claude Code — backlog, code-review-cadu, grillme-langgraph, grillme-gestor",
+  "description": "Marketplace de Agent Skills para Claude Code — backlog, code-review-cadu, relatorio-gerencial, grillme-langgraph, grillme-gestor",
   "owner": {
     "name": "Carlos Araujo",
     "email": "cadu.gevaerd@gmail.com"
@@ -21,7 +21,7 @@
     },
     {
       "name": "code-review-cadu",
-      "description": "Code review de PR com veredicto GO/NO-GO por finding sobre o merge: NO-GO = merge bloqueado, corrigir nesta PR; GO = merge pode seguir, finding diferível registrado no backlog (.specify/backlog.json via skill /backlog, após confirmação do usuário). Fork do plugin oficial code-review da Anthropic (Apache-2.0).",
+      "description": "Code review de PR com veredicto GO/NO-GO por finding sobre o merge: NO-GO = merge bloqueado, corrigir nesta PR; GO = merge pode seguir, finding diferível registrado no backlog global (~/.backlog/backlog.json via skill /backlog, após confirmação do usuário). Fork do plugin oficial code-review da Anthropic (Apache-2.0).",
       "source": "./plugins/code-review-cadu",
       "version": "1.3.0",
       "author": {
@@ -29,6 +29,17 @@
       },
       "category": "development",
       "tags": ["code-review", "pull-request", "go-no-go", "backlog", "triage", "quality"]
+    },
+    {
+      "name": "relatorio-gerencial",
+      "description": "Gera um PDF executivo (resumo + páginas de detalhe, visual e com emojis) para o gerente, combinando tarefas atuais informadas manualmente com o backlog técnico coletado do backlog GLOBAL único (~/.backlog/backlog.json) — todos os repos de uma vez, agrupados pelo campo `repo`, sem precisar registrar repositórios. Agrupa microtarefas em até 5 iniciativas de negócio e renderiza via Playwright/WeasyPrint/Chromium/Pillow.",
+      "source": "./plugins/relatorio-gerencial",
+      "version": "0.2.0",
+      "author": {
+        "name": "Carlos Araujo"
+      },
+      "category": "productivity",
+      "tags": ["relatorio", "gestao", "backlog", "pdf", "portfolio", "executivo"]
     },
     {
       "name": "grillme-langgraph",

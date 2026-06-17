@@ -1,0 +1,8 @@
+{
+  "name": "relatorio-gerencial",
+  "version": "0.2.0",
+  "description": "Gera um PDF executivo (resumo + páginas de detalhe, visual e com emojis) para o gerente, combinando tarefas atuais informadas manualmente com o backlog técnico coletado do backlog GLOBAL único (~/.backlog/backlog.json) — todos os repositórios de uma vez, agrupados pelo campo `repo`, sem precisar registrar repos.",
+  "author": {
+    "name": "Carlos Araujo"
+  }
+}
