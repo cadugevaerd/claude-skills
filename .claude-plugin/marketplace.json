@@ -2,7 +2,7 @@
   "$schema": "https://api.claude.ai/schemas/marketplace-v1.json",
   "name": "claude-skills",
   "version": "1.0.0",
-  "description": "Marketplace de Agent Skills para Claude Code — backlog, code-review-cadu, relatorio-gerencial, grillme-langgraph, grillme-gestor",
+  "description": "Marketplace de Agent Skills para Claude Code — backlog, code-review-cadu, code-debug, relatorio-gerencial, grillme-langgraph, grillme-gestor",
   "owner": {
     "name": "Carlos Araujo",
     "email": "cadu.gevaerd@gmail.com"
@@ -17,7 +17,14 @@
         "name": "Carlos Araujo"
       },
       "category": "productivity",
-      "tags": ["backlog", "todo", "debt", "triage", "speckit", "workflow"]
+      "tags": [
+        "backlog",
+        "todo",
+        "debt",
+        "triage",
+        "speckit",
+        "workflow"
+      ]
     },
     {
       "name": "code-review-cadu",
@@ -28,7 +35,32 @@
         "name": "Carlos Araujo"
       },
       "category": "development",
-      "tags": ["code-review", "pull-request", "go-no-go", "backlog", "triage", "quality"]
+      "tags": [
+        "code-review",
+        "pull-request",
+        "go-no-go",
+        "backlog",
+        "triage",
+        "quality"
+      ]
+    },
+    {
+      "name": "code-debug",
+      "description": "Debug disciplinado por causa raiz: recebe comando/log, reproduz, coleta evidencias, instrumenta quando necessario e entrega relatorio com causa comprovada e sugestao de fix.",
+      "source": "./plugins/code-debug",
+      "version": "1.0.0",
+      "author": {
+        "name": "Carlos Araujo"
+      },
+      "category": "development",
+      "tags": [
+        "debug",
+        "root-cause",
+        "logs",
+        "instrumentation",
+        "bugfix",
+        "troubleshooting"
+      ]
     },
     {
       "name": "relatorio-gerencial",
@@ -39,7 +71,14 @@
         "name": "Carlos Araujo"
       },
       "category": "productivity",
-      "tags": ["relatorio", "gestao", "backlog", "pdf", "portfolio", "executivo"]
+      "tags": [
+        "relatorio",
+        "gestao",
+        "backlog",
+        "pdf",
+        "portfolio",
+        "executivo"
+      ]
     },
     {
       "name": "grillme-langgraph",
@@ -50,7 +89,13 @@
         "name": "Carlos Araujo"
       },
       "category": "development",
-      "tags": ["langgraph", "langchain", "agents", "design", "interview"]
+      "tags": [
+        "langgraph",
+        "langchain",
+        "agents",
+        "design",
+        "interview"
+      ]
     },
     {
       "name": "grillme-gestor",
@@ -61,7 +106,13 @@
         "name": "Carlos Araujo"
       },
       "category": "development",
-      "tags": ["langgraph", "gestor", "nao-tecnico", "design", "interview"]
+      "tags": [
+        "langgraph",
+        "gestor",
+        "nao-tecnico",
+        "design",
+        "interview"
+      ]
     }
   ]
 }

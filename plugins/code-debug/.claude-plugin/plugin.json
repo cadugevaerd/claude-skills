@@ -1,0 +1,8 @@
+{
+  "name": "code-debug",
+  "version": "1.0.0",
+  "description": "Debug disciplinado por causa raiz: reproduz comando, analisa logs, instrumenta quando necessario e entrega relatorio com causa comprovada e sugestao de fix.",
+  "author": {
+    "name": "Carlos Araujo"
+  }
+}
