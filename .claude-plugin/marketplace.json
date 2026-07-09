@@ -2,7 +2,7 @@
   "$schema": "https://api.claude.ai/schemas/marketplace-v1.json",
   "name": "claude-skills",
   "version": "1.0.0",
-  "description": "Marketplace de Agent Skills para Claude Code — backlog, code-review-cadu, code-debug, relatorio-gerencial, grillme-langgraph, grillme-gestor, rag-kag-decision",
+  "description": "Marketplace de Agent Skills para Claude Code — backlog, code-review-cadu, code-debug, relatorio-gerencial, grillme-langgraph, grillme-gestor, rag-kag-decision, modelos-custo-beneficio",
   "owner": {
     "name": "Carlos Araujo",
     "email": "cadu.gevaerd@gmail.com"
@@ -131,6 +131,25 @@
         "knowledge-graph",
         "architecture",
         "decision"
+      ]
+    },
+    {
+      "name": "modelos-custo-beneficio",
+      "description": "Seleciona os 5 modelos LLM latest com melhor custo-beneficio conforme requisitos: throughput minimo, input modalities, Tool Calls, structured outputs, contexto e custo.",
+      "source": "./plugins/modelos-custo-beneficio",
+      "version": "0.1.0",
+      "author": {
+        "name": "Carlos Araujo"
+      },
+      "category": "development",
+      "tags": [
+        "llm",
+        "models",
+        "openrouter",
+        "cost",
+        "throughput",
+        "tool-calling",
+        "structured-outputs"
       ]
     }
   ]
