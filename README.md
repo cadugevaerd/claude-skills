@@ -9,6 +9,7 @@ Coleção de [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) 
 | **`code-debug`** | Debug por causa raiz: recebe comando/log, reproduz, coleta evidências, instrumenta quando necessário e entrega relatório com causa comprovada e sugestão de fix. |
 | **`grillme-langgraph`** | Entrevista técnica que transforma a descrição de um processo no rascunho de um fluxo **LangGraph** — diagrama do grafo, schema do State (Regra CRUE), tabela de nodes determinístico vs não-determinístico. |
 | **`grillme-gestor`** | Versão não-técnica da `grillme-langgraph`: o gestor descreve o processo em linguagem comum (sem jargão) e recebe **o mesmo** artefato técnico em markdown. |
+| **`rag-kag-decision`** | Decide quando usar RAG, KAG, GraphRAG ou abordagem híbrida conforme documentos, entidades, relações, regras, temporalidade, custo e risco. |
 
 ## Instalação
 
@@ -27,6 +28,7 @@ claude plugin install code-review-cadu@claude-skills
 claude plugin install code-debug@claude-skills
 claude plugin install grillme-gestor@claude-skills
 claude plugin install grillme-langgraph@claude-skills
+claude plugin install rag-kag-decision@claude-skills
 ```
 
 Ou dentro de uma sessão do Claude Code:
@@ -89,6 +91,7 @@ Reinicie o Claude Code (ou abra uma nova sessão).
 /code-debug <comando> # debug disciplinado por causa raiz
 /grillme-langgraph     # design LangGraph — versão técnica
 /grillme-gestor        # design LangGraph — versão para o gestor
+/rag-kag-decision <caso de uso, fontes de dados, risco e exemplos de perguntas>
 ```
 
 ## Sobre as skills
@@ -104,6 +107,10 @@ Fork do plugin oficial `code-review` da Anthropic (Apache-2.0), mantendo o pipel
 ### code-debug
 
 Skill para investigar falhas sem chute: reproduz o comando ou cenário informado, coleta logs/evidências, adiciona instrumentação mínima quando necessário e só declara causa raiz quando há prova objetiva. A saída padrão é um relatório com evidências, caminho de investigação, causa raiz comprovada (ou pendências) e sugestão de fix.
+
+### rag-kag-decision
+
+Framework de decisão para arquitetura de conhecimento em LLMs: avalia se o caso pede RAG, KAG, GraphRAG ou híbrido. Usa sinais como base documental, entidades, relações, regras, temporalidade, risco do erro, velocidade de atualização e maturidade para manter grafo/ontologia. A saída recomendada inclui decisão, motivos, arquitetura mínima, riscos e gatilhos de migração.
 
 ### grillme-langgraph / grillme-gestor
 

@@ -1,0 +1,8 @@
+{
+  "name": "rag-kag-decision",
+  "version": "1.0.0",
+  "description": "Decide quando usar RAG, KAG, GraphRAG ou abordagem hibrida em arquiteturas LLM com conhecimento externo.",
+  "author": {
+    "name": "Carlos Araujo"
+  }
+}
