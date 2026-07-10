@@ -2,7 +2,7 @@
   "$schema": "https://api.claude.ai/schemas/marketplace-v1.json",
   "name": "claude-skills",
   "version": "1.0.0",
-  "description": "Marketplace de Agent Skills para Claude Code — backlog, code-review-cadu, code-debug, relatorio-gerencial, grillme-langgraph, grillme-gestor, rag-kag-decision, modelos-custo-beneficio",
+  "description": "Marketplace de Agent Skills para Claude Code — backlog, code-review-cadu, code-debug, relatorio-gerencial, grillme-langgraph, grillme-gestor, rag-kag-decision, modelos-custo-beneficio, facilitador-reunioes",
   "owner": {
     "name": "Carlos Araujo",
     "email": "cadu.gevaerd@gmail.com"
@@ -150,6 +150,23 @@
         "throughput",
         "tool-calling",
         "structured-outputs"
+      ]
+    },
+    {
+      "name": "facilitador-reunioes",
+      "description": "Facilita reuniões objetivas: define título, objetivo claro, pré-briefing, condução e próximos passos antes de encerrar.",
+      "source": "./plugins/facilitador-reunioes",
+      "version": "0.1.0",
+      "author": {
+        "name": "Carlos Araujo"
+      },
+      "category": "productivity",
+      "tags": [
+        "reuniao",
+        "meeting",
+        "facilitacao",
+        "agenda",
+        "proximos-passos"
       ]
     }
   ]
