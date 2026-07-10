@@ -11,6 +11,7 @@ Coleção de [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) 
 | **`grillme-gestor`** | Versão não-técnica da `grillme-langgraph`: o gestor descreve o processo em linguagem comum (sem jargão) e recebe **o mesmo** artefato técnico em markdown. |
 | **`rag-kag-decision`** | Decide quando usar RAG, KAG, GraphRAG ou abordagem híbrida conforme documentos, entidades, relações, regras, temporalidade, custo e risco. |
 | **`modelos-custo-beneficio`** | Consulta OpenRouter em tempo real e recomenda 5 modelos LLM latest por custo-benefício, filtrando throughput mínimo, input modalities, Tool Calls, structured outputs, contexto e custo. |
+| **`facilitador-reunioes`** | Cria convites, objetivos claros, pré-briefing, roteiro de condução e próximos passos para reuniões objetivas. |
 
 ## Instalação
 
@@ -31,6 +32,7 @@ claude plugin install grillme-gestor@claude-skills
 claude plugin install grillme-langgraph@claude-skills
 claude plugin install rag-kag-decision@claude-skills
 claude plugin install modelos-custo-beneficio@claude-skills
+claude plugin install facilitador-reunioes@claude-skills
 ```
 
 Ou dentro de uma sessão do Claude Code:
@@ -95,6 +97,7 @@ Reinicie o Claude Code (ou abra uma nova sessão).
 /grillme-gestor        # design LangGraph — versão para o gestor
 /rag-kag-decision <caso de uso, fontes de dados, risco e exemplos de perguntas>
 /modelos-custo-beneficio throughput_min=50 input=text,image tool_calls=true structured_outputs=true
+/facilitador-reunioes <tema, participantes, decisão esperada, contexto>
 ```
 
 ## Sobre as skills
@@ -118,6 +121,11 @@ Framework de decisão para arquitetura de conhecimento em LLMs: avalia se o caso
 ### modelos-custo-beneficio
 
 Consulta a API do OpenRouter (`/models` + `/endpoints`) e, opcionalmente, Artificial Analysis (`AA_API_KEY`) para ranquear modelos por score custo-benefício: throughput, uptime, contexto, qualidade opcional e custo ponderado. A skill aceita requisitos via parametro (`throughput_min`, `input`, `tool_calls`, `structured_outputs`, `min_context`, `max_cost_per_1m`) e mantém apenas a versão mais nova por família heurística.
+
+
+### facilitador-reunioes
+
+Skill para combater reuniões vagas: valida se a reunião é necessária, transforma o pedido em título objetivo, objetivo claro, pré-briefing para convite, pauta com timebox, guia de condução e fechamento obrigatório com ações, donos, prazos, critérios de pronto e comunicação.
 
 ### grillme-langgraph / grillme-gestor
 
