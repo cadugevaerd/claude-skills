@@ -20,8 +20,8 @@ fonte da skill `/backlog`). Os repositórios e itens são **descobertos
 automaticamente** — cada item carrega o campo `repo` (repositório-alvo), então o
 report cobre todos os repos de uma vez **sem precisar registrar/habilitar nada**.
 
-- `scripts/coletar_backlogs.py` lê o global por padrão, filtra `resolvido`/
-  `descartado` e agrupa por `repo`. Para um report de um repo só, use
+- `scripts/coletar_backlogs.py` lê o global por padrão, filtra `resolvido`,
+  `descartado` e `mesclado` e agrupa por `repo`. Para um report de um repo só, use
   `--repo <nome>` (pode repetir).
 - Se `~/.backlog/backlog.json` não existir, a skill `/backlog` faz o bootstrap
   dele (ou rode `/backlog init`).

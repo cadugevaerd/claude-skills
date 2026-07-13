@@ -4,8 +4,8 @@ Coleção de [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) 
 
 | Skill | O que faz |
 |-------|-----------|
-| **`backlog`** | Fonte da verdade de itens diferidos (`.specify/backlog.json`): registra, tria, promove e resolve features/bugs/débitos técnicos. Faz bootstrap da estrutura no projeto (JSON + `BACKLOG.md` + seção no `CLAUDE.md`) e, a cada execução, varre o projeto migrando TODOs/FIXMEs soltos e listas de pendências para a fonte da verdade. |
-| **`code-review-cadu`** | Code review de PR com **veredicto GO/NO-GO por finding** (sobre o merge): NO-GO = merge bloqueado, corrigir nesta PR; GO = merge pode seguir, finding diferível → backlog (`.specify/backlog.json` via skill `/backlog`, após confirmação). Fork do plugin oficial `code-review` da Anthropic (Apache-2.0). |
+| **`backlog`** | Fonte da verdade GLOBAL de itens diferidos (`~/.backlog/backlog.json`): um backlog único para todos os repositórios, identificado por `repo` + `BL-NNNN`. Registra, tria, promove, resolve, descarta e consolida duplicatas auditáveis com `merge`, preservando fontes absorvidas e histórico. |
+| **`code-review-cadu`** | Code review de PR com **veredicto GO/NO-GO por finding** (sobre o merge): NO-GO = merge bloqueado, corrigir nesta PR; GO = merge pode seguir, finding diferível → backlog GLOBAL (`~/.backlog/backlog.json` via skill `/backlog`, após confirmação). Fork do plugin oficial `code-review` da Anthropic (Apache-2.0). |
 | **`code-debug`** | Debug por causa raiz: recebe comando/log, reproduz, coleta evidências, instrumenta quando necessário e entrega relatório com causa comprovada e sugestão de fix. |
 | **`grillme-langgraph`** | Entrevista técnica que transforma a descrição de um processo no rascunho de um fluxo **LangGraph** — diagrama do grafo, schema do State (Regra CRUE), tabela de nodes determinístico vs não-determinístico. |
 | **`grillme-gestor`** | Versão não-técnica da `grillme-langgraph`: o gestor descreve o processo em linguagem comum (sem jargão) e recebe **o mesmo** artefato técnico em markdown. |
@@ -90,7 +90,9 @@ Reinicie o Claude Code (ou abra uma nova sessão).
 
 ```
 /backlog               # registrar/triar/promover itens diferidos (faz bootstrap se preciso)
-/backlog format        # reorganizar: re-triar severidade + atribuir rank 1–100 (ordem de ataque)
+/backlog format        # reorganizar um repo: re-triar severidade + atribuir rank 1–100
+/backlog merge repo=all # propor merge de duplicatas por repo; pede confirmação antes de gravar
+/backlog merge undo evt-20260619-0001 # reverter um merge somente se o estado ainda corresponder
 /code-review-cadu 42   # review da PR #42 com veredicto GO/NO-GO + backlog
 /code-debug <comando> # debug disciplinado por causa raiz
 /grillme-langgraph     # design LangGraph — versão técnica
@@ -104,11 +106,13 @@ Reinicie o Claude Code (ou abra uma nova sessão).
 
 ### backlog
 
-Opera a fonte da verdade única de trabalho diferido do projeto (`.specify/backlog.json`, itens `BL-NNNN` com type/status/priority/rank). Na primeira execução num projeto, cria a estrutura base e a instrução normativa no `CLAUDE.md`. Em toda execução, varre o projeto por backlog não estruturado (TODOs/FIXMEs soltos, `TODO.md`, listas de pendências) e migra para a estrutura padrão. Operações: `add`, `list`, `format`, `promote`, `resolve`, `discard`, `init`. A `format` reorganiza o backlog — re-tria a **severidade** (4 níveis: crítica/alta/média/baixa) e atribui o **rank** 1–100 (ordem de ataque única, único por item), exibindo a proposta agrupada por severidade e gravando só após confirmação.
+Opera a fonte da verdade GLOBAL de trabalho diferido (`~/.backlog/backlog.json`), com identidade `(repo, BL-NNNN)`, type/status/priority/rank e bootstrap seguro do store único. Em toda execução, varre o repo do CWD por backlog não estruturado (TODOs/FIXMEs soltos, `TODO.md`, listas de pendências) e migra apenas achados claros. Operações: `add`, `list`, `format`, `promote`, `resolve`, `discard`, `merge`, `merge undo`, `init`.
+
+`/backlog merge [repo=<nome>|repo=all]` propõe, por repo, clusters pequenos de duplicatas abertas e só grava após confirmação explícita daquele repo. Mantém um canônico existente, marca fontes como `mesclado`, não cria IDs e registra hashes, snapshots e evidência do subagente em `merge_history`; `/backlog merge undo <event_id>` reverte apenas quando o estado ainda é exatamente o esperado. A `format` reorganiza somente itens ativos — re-tria a **severidade** (4 níveis: crítica/alta/média/baixa) e atribui **rank** 1–100 único por repo; itens mesclados/terminais sempre têm rank nulo.
 
 ### code-review-cadu
 
-Fork do plugin oficial `code-review` da Anthropic (Apache-2.0), mantendo o pipeline original (gate de elegibilidade → 5 agentes revisores paralelos → scoring de confiança 0-100 → filtro ≥80 → comentário na PR) e adicionando a triagem — o veredicto é sobre o **merge**: cada finding recebe **NO-GO** (merge bloqueado, corrigir nesta PR: correctness, segurança, perda de dados, regressão, contrato com infra real) ou **GO** (merge pode seguir: cleanup, refactor, débito, eficiência — diferível). O comentário na PR prefixa cada item com o veredicto; os GO são apresentados ao usuário e, **só após confirmação**, registrados em lote no backlog do projeto via `/backlog`, com o `BL-NNNN` citado em cada um.
+Fork do plugin oficial `code-review` da Anthropic (Apache-2.0), mantendo o pipeline original (gate de elegibilidade → 5 agentes revisores paralelos → scoring de confiança 0-100 → filtro ≥80 → comentário na PR) e adicionando a triagem — o veredicto é sobre o **merge**: cada finding recebe **NO-GO** (merge bloqueado, corrigir nesta PR: correctness, segurança, perda de dados, regressão, contrato com infra real) ou **GO** (merge pode seguir: cleanup, refactor, débito, eficiência — diferível). O comentário na PR prefixa cada item com o veredicto; os GO são apresentados ao usuário e, **só após confirmação**, registrados em lote no backlog GLOBAL via `/backlog`, com o `BL-NNNN` citado em cada um.
 
 ### code-debug
 
