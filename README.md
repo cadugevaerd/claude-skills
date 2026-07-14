@@ -10,7 +10,7 @@ Coleção de [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) 
 | **`grillme-langgraph`** | Entrevista técnica que transforma a descrição de um processo no rascunho de um fluxo **LangGraph** — diagrama do grafo, schema do State (Regra CRUE), tabela de nodes determinístico vs não-determinístico. |
 | **`grillme-gestor`** | Versão não-técnica da `grillme-langgraph`: o gestor descreve o processo em linguagem comum (sem jargão) e recebe **o mesmo** artefato técnico em markdown. |
 | **`rag-kag-decision`** | Decide quando usar RAG, KAG, GraphRAG ou abordagem híbrida conforme documentos, entidades, relações, regras, temporalidade, custo e risco. |
-| **`modelos-custo-beneficio`** | Consulta OpenRouter em tempo real e recomenda 5 modelos LLM latest por custo-benefício, filtrando throughput mínimo, input modalities, Tool Calls, structured outputs, contexto e custo. |
+| **`modelos-custo-beneficio`** | Consulta OpenRouter e lista até 5 candidatos para Model Engineering Eval, com reasoning controlável, throughput p75/p50 ≥60 t/s e variantes `:exacto`/`:nitro`; não decide runtime. |
 | **`facilitador-reunioes`** | Cria convites, objetivos claros, pré-briefing, roteiro de condução e próximos passos para reuniões objetivas. |
 
 ## Instalação
@@ -99,7 +99,7 @@ Reinicie o Claude Code (ou abra uma nova sessão).
 /grillme-langgraph     # design LangGraph — versão técnica
 /grillme-gestor        # design LangGraph — versão para o gestor
 /rag-kag-decision <caso de uso, fontes de dados, risco e exemplos de perguntas>
-/modelos-custo-beneficio throughput_min=50 input=text,image tool_calls=true structured_outputs=true
+/modelos-custo-beneficio throughput_min=60 input=text,image tool_calls=true structured_outputs=true
 /facilitador-reunioes <tema, participantes, decisão esperada, contexto>
 ```
 
@@ -127,7 +127,7 @@ Framework de decisão para arquitetura de conhecimento em LLMs: avalia se o caso
 
 ### modelos-custo-beneficio
 
-Consulta a API do OpenRouter (`/models` + `/endpoints`) e, opcionalmente, Artificial Analysis (`AA_API_KEY`) para ranquear modelos por score custo-benefício: throughput, uptime, contexto, qualidade opcional e custo ponderado. A skill aceita requisitos via parametro (`throughput_min`, `input`, `tool_calls`, `structured_outputs`, `min_context`, `max_cost_per_1m`) e mantém apenas a versão mais nova por família heurística.
+Consulta a API do OpenRouter (`/models` + `/endpoints`) para listar até cinco candidatos ao Model Engineering Eval. Exige reasoning controlável, endpoint com throughput `p75 >= 60 t/s` (ou `p50` como fallback), capacidades solicitadas e modelo não gratuito. `tool_calls=true` emite `:exacto`; geração textual emite `:nitro`. A skill não executa Eval, não escolhe vencedor e não altera runtime.
 
 
 ### facilitador-reunioes

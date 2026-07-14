@@ -1,7 +1,7 @@
 {
   "name": "modelos-custo-beneficio",
-  "version": "0.1.0",
-  "description": "Seleciona os 5 modelos LLM latest com melhor custo-beneficio por requisitos: throughput mínimo, modalidades de input/output, Tool Calls, structured outputs, contexto e custo. **PRÉ-REQUISITO:** `OPENROUTER_API_KEY` deve estar no ambiente (carregue via `op item get 'OpenRouter API Key' --vault 'Automação' --fields credential --reveal`).",
+  "version": "0.2.0",
+  "description": "Seleciona até 5 candidatos OpenRouter para Model Engineering Eval: reasoning controlável, throughput hard >=60 t/s (p75; p50 fallback) e variantes :exacto/:nitro. Não executa Eval nem altera runtime. **PRÉ-REQUISITO:** `OPENROUTER_API_KEY` deve estar no ambiente (carregue via `op item get 'OpenRouter API Key' --vault 'Automação' --fields credential --reveal`).",
   "author": {
     "name": "Carlos Araujo"
   }
