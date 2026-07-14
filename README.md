@@ -91,7 +91,7 @@ Reinicie o Claude Code (ou abra uma nova sessão).
 ```
 /backlog               # registrar/triar/promover itens diferidos (faz bootstrap se preciso)
 /backlog format        # reorganizar um repo: re-triar severidade + atribuir rank 1–100
-/backlog consolidado repo=all # preview e gera ./consolidado_backlog.md por cluster após confirmação
+/backlog consolidado repo=all # preview e gera ./consolidado_backlog.md por cluster e criticidade após confirmação
 /backlog merge repo=all # propor merge de duplicatas por repo; pede confirmação antes de gravar
 /backlog merge undo evt-20260619-0001 # reverter um merge somente se o estado ainda corresponder
 /code-review-cadu 42   # review da PR #42 com veredicto GO/NO-GO + backlog
@@ -111,7 +111,7 @@ Opera a fonte da verdade GLOBAL de trabalho diferido (`~/.backlog/backlog.json`)
 
 `/backlog merge [repo=<nome>|repo=all]` propõe, por repo, clusters pequenos de duplicatas abertas e só grava após confirmação explícita daquele repo. Mantém um canônico existente, marca fontes como `mesclado`, não cria IDs e registra hashes, snapshots e evidência do subagente em `merge_history`; `/backlog merge undo <event_id>` reverte apenas quando o estado ainda é exatamente o esperado. A `format` reorganiza somente itens ativos — re-tria a **severidade** (4 níveis: crítica/alta/média/baixa) e atribui **rank** 1–100 único por repo; itens mesclados/terminais sempre têm rank nulo.
 
-`/backlog consolidado [repo=<nome>|repo=all] [output=<caminho>]` lê um snapshot sem alterar a fonte, agrupa apenas itens `aberto` e `em-andamento` por objetivo de negócio e gera `consolidado_backlog.md`. Cada atividade traz **Problema** e **O que será resolvido** em linguagem não técnica. O arquivo é derivado, exige confirmação antes de substituição e não se torna uma segunda fonte de verdade.
+`/backlog consolidado [repo=<nome>|repo=all] [output=<caminho>]` lê um snapshot sem alterar a fonte, agrupa apenas itens `aberto` e `em-andamento` por objetivo de negócio e criticidade, gera `consolidado_backlog.md` com resumo de prioridade e omite faixas vazias. Cada atividade traz **Problema** e **O que será resolvido** em linguagem não técnica. O arquivo é derivado, exige confirmação antes de substituição e não se torna uma segunda fonte de verdade.
 
 ### code-review-cadu
 
