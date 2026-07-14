@@ -4,7 +4,7 @@ Coleção de [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) 
 
 | Skill | O que faz |
 |-------|-----------|
-| **`backlog`** | Fonte da verdade GLOBAL de itens diferidos (`~/.backlog/backlog.json`): um backlog único para todos os repositórios, identificado por `repo` + `BL-NNNN`. Registra, tria, promove, resolve, descarta e consolida duplicatas auditáveis com `merge`, preservando fontes absorvidas e histórico. |
+| **`backlog`** | Fonte da verdade GLOBAL de itens diferidos (`~/.backlog/backlog.json`): um backlog único para todos os repositórios, identificado por `repo` + `BL-NNNN`. Registra, tria, promove, resolve, descarta e consolida duplicatas auditáveis com `merge`; gera `consolidado_backlog.md` por clusters de negócio, em linguagem não técnica, com problema e resolução por atividade. |
 | **`code-review-cadu`** | Code review de PR com **veredicto GO/NO-GO por finding** (sobre o merge): NO-GO = merge bloqueado, corrigir nesta PR; GO = merge pode seguir, finding diferível → backlog GLOBAL (`~/.backlog/backlog.json` via skill `/backlog`, após confirmação). Fork do plugin oficial `code-review` da Anthropic (Apache-2.0). |
 | **`code-debug`** | Debug por causa raiz: recebe comando/log, reproduz, coleta evidências, instrumenta quando necessário e entrega relatório com causa comprovada e sugestão de fix. |
 | **`grillme-langgraph`** | Entrevista técnica que transforma a descrição de um processo no rascunho de um fluxo **LangGraph** — diagrama do grafo, schema do State (Regra CRUE), tabela de nodes determinístico vs não-determinístico. |
@@ -91,6 +91,7 @@ Reinicie o Claude Code (ou abra uma nova sessão).
 ```
 /backlog               # registrar/triar/promover itens diferidos (faz bootstrap se preciso)
 /backlog format        # reorganizar um repo: re-triar severidade + atribuir rank 1–100
+/backlog consolidado repo=all # preview e gera ./consolidado_backlog.md por cluster após confirmação
 /backlog merge repo=all # propor merge de duplicatas por repo; pede confirmação antes de gravar
 /backlog merge undo evt-20260619-0001 # reverter um merge somente se o estado ainda corresponder
 /code-review-cadu 42   # review da PR #42 com veredicto GO/NO-GO + backlog
@@ -106,9 +107,11 @@ Reinicie o Claude Code (ou abra uma nova sessão).
 
 ### backlog
 
-Opera a fonte da verdade GLOBAL de trabalho diferido (`~/.backlog/backlog.json`), com identidade `(repo, BL-NNNN)`, type/status/priority/rank e bootstrap seguro do store único. Em toda execução, varre o repo do CWD por backlog não estruturado (TODOs/FIXMEs soltos, `TODO.md`, listas de pendências) e migra apenas achados claros. Operações: `add`, `list`, `format`, `promote`, `resolve`, `discard`, `merge`, `merge undo`, `init`.
+Opera a fonte da verdade GLOBAL de trabalho diferido (`~/.backlog/backlog.json`), com identidade `(repo, BL-NNNN)`, type/status/priority/rank e bootstrap seguro do store único. Operações mutáveis varrem o repo do CWD por backlog não estruturado (TODOs/FIXMEs soltos, `TODO.md`, listas de pendências) e migram apenas achados claros. Operações: `add`, `list`, `consolidado`, `format`, `promote`, `resolve`, `discard`, `merge`, `merge undo`, `init`.
 
 `/backlog merge [repo=<nome>|repo=all]` propõe, por repo, clusters pequenos de duplicatas abertas e só grava após confirmação explícita daquele repo. Mantém um canônico existente, marca fontes como `mesclado`, não cria IDs e registra hashes, snapshots e evidência do subagente em `merge_history`; `/backlog merge undo <event_id>` reverte apenas quando o estado ainda é exatamente o esperado. A `format` reorganiza somente itens ativos — re-tria a **severidade** (4 níveis: crítica/alta/média/baixa) e atribui **rank** 1–100 único por repo; itens mesclados/terminais sempre têm rank nulo.
+
+`/backlog consolidado [repo=<nome>|repo=all] [output=<caminho>]` lê um snapshot sem alterar a fonte, agrupa apenas itens `aberto` e `em-andamento` por objetivo de negócio e gera `consolidado_backlog.md`. Cada atividade traz **Problema** e **O que será resolvido** em linguagem não técnica. O arquivo é derivado, exige confirmação antes de substituição e não se torna uma segunda fonte de verdade.
 
 ### code-review-cadu
 
