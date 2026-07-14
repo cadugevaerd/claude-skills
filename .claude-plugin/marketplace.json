@@ -135,9 +135,9 @@
     },
     {
       "name": "modelos-custo-beneficio",
-      "description": "Seleciona os 5 modelos LLM latest com melhor custo-beneficio conforme requisitos: throughput minimo, input modalities, Tool Calls, structured outputs, contexto e custo.",
+      "description": "Lista até 5 candidatos OpenRouter para Model Engineering Eval: reasoning controlável, throughput hard >=60 t/s (p75; p50 fallback) e variantes :exacto/:nitro; não executa Eval nem altera runtime.",
       "source": "./plugins/modelos-custo-beneficio",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Carlos Araujo"
       },
