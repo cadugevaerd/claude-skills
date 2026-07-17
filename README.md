@@ -12,7 +12,7 @@ Coleção de [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) 
 | **`rag-kag-decision`** | Decide quando usar RAG, KAG, GraphRAG ou abordagem híbrida conforme documentos, entidades, relações, regras, temporalidade, custo e risco. |
 | **`modelos-custo-beneficio`** | Consulta OpenRouter e lista até 5 candidatos para Model Engineering Eval, com reasoning controlável, throughput p75/p50 ≥60 t/s e variantes `:exacto`/`:nitro`; não decide runtime. |
 | **`facilitador-reunioes`** | Cria convites, objetivos claros, pré-briefing, roteiro de condução e próximos passos para reuniões objetivas. |
-| **`langsmith-evals`** | Engenharia e auditoria LangSmith-first para chatbots, RAG, agents, nodes e grafos. Inclui `langsmith-evals-engineer` e `langsmith-evals-auditor`, ambos fixados em `sonnet`. |
+| **`langsmith-evals`** | Engenharia e auditoria LangSmith-first para chatbots, RAG, agents, nodes e grafos. Inclui Engineer, Pytest Engineer deterministico e Auditor, todos fixados em `sonnet`. |
 
 ## Instalação
 
