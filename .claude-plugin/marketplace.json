@@ -2,7 +2,7 @@
   "$schema": "https://api.claude.ai/schemas/marketplace-v1.json",
   "name": "claude-skills",
   "version": "1.0.0",
-  "description": "Marketplace de Agent Skills para Claude Code — backlog, code-review-cadu, code-debug, relatorio-gerencial, grillme-langgraph, grillme-gestor, rag-kag-decision, modelos-custo-beneficio, facilitador-reunioes",
+  "description": "Marketplace de Agent Skills para Claude Code — backlog, code-review-cadu, code-debug, relatorio-gerencial, grillme-langgraph, grillme-gestor, rag-kag-decision, modelos-custo-beneficio, facilitador-reunioes e langsmith-evals",
   "owner": {
     "name": "Carlos Araujo",
     "email": "cadu.gevaerd@gmail.com"
@@ -167,6 +167,25 @@
         "facilitacao",
         "agenda",
         "proximos-passos"
+      ]
+    },
+    {
+      "name": "langsmith-evals",
+      "description": "Engenharia e auditoria LangSmith-first para datasets, evaluators, experiments, backtests, comparação de modelos e gates de promoção. Inclui Engineer e Auditor independentes, ambos fixados em Sonnet.",
+      "source": "./plugins/langsmith-evals",
+      "version": "1.0.0",
+      "author": {
+        "name": "Carlos Araujo"
+      },
+      "category": "development",
+      "tags": [
+        "langsmith",
+        "evals",
+        "datasets",
+        "experiments",
+        "backtesting",
+        "llm-as-judge",
+        "langgraph"
       ]
     }
   ]

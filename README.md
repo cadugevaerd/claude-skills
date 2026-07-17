@@ -12,6 +12,7 @@ Coleção de [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) 
 | **`rag-kag-decision`** | Decide quando usar RAG, KAG, GraphRAG ou abordagem híbrida conforme documentos, entidades, relações, regras, temporalidade, custo e risco. |
 | **`modelos-custo-beneficio`** | Consulta OpenRouter e lista até 5 candidatos para Model Engineering Eval, com reasoning controlável, throughput p75/p50 ≥60 t/s e variantes `:exacto`/`:nitro`; não decide runtime. |
 | **`facilitador-reunioes`** | Cria convites, objetivos claros, pré-briefing, roteiro de condução e próximos passos para reuniões objetivas. |
+| **`langsmith-evals`** | Engenharia e auditoria LangSmith-first para chatbots, RAG, agents, nodes e grafos. Inclui `langsmith-evals-engineer` e `langsmith-evals-auditor`, ambos fixados em `sonnet`. |
 
 ## Instalação
 
@@ -33,6 +34,7 @@ claude plugin install grillme-langgraph@claude-skills
 claude plugin install rag-kag-decision@claude-skills
 claude plugin install modelos-custo-beneficio@claude-skills
 claude plugin install facilitador-reunioes@claude-skills
+claude plugin install langsmith-evals@claude-skills
 ```
 
 Ou dentro de uma sessão do Claude Code:
@@ -101,6 +103,7 @@ Reinicie o Claude Code (ou abra uma nova sessão).
 /rag-kag-decision <caso de uso, fontes de dados, risco e exemplos de perguntas>
 /modelos-custo-beneficio throughput_min=60 input=text,image tool_calls=true structured_outputs=true
 /facilitador-reunioes <tema, participantes, decisão esperada, contexto>
+/langsmith-evals <sistema ou mudança a avaliar; engineer|audit>
 ```
 
 ## Sobre as skills
@@ -133,6 +136,10 @@ Consulta a API do OpenRouter (`/models` + `/endpoints`) para listar até cinco c
 ### facilitador-reunioes
 
 Skill para combater reuniões vagas: valida se a reunião é necessária, transforma o pedido em título objetivo, objetivo claro, pré-briefing para convite, pauta com timebox, guia de condução e fechamento obrigatório com ações, donos, prazos, critérios de pronto e comunicação.
+
+### langsmith-evals
+
+Usa LangSmith como control plane para Datasets, Examples, Experiments, Traces e Feedback, mantendo pytest e oráculos determinísticos no repositório. O `langsmith-evals-engineer` implementa e executa evals, comparações e backtests; o `langsmith-evals-auditor` revisa a evidência sem editar artefatos e emite `GO`, `NO-GO` ou `BLOCKED`. A separação evita que o autor da rubrica seja o único aprovador da promoção. Os dois subagentes declaram `model: sonnet` no frontmatter.
 
 ### grillme-langgraph / grillme-gestor
 
