@@ -1,0 +1,8 @@
+{
+  "name": "agentcore-cli",
+  "version": "1.0.0",
+  "description": "Opera Amazon Bedrock AgentCore CLI com desenvolvimento local, deploy seguro, observabilidade e EVALs LLM-as-a-Judge, batch e online.",
+  "author": {
+    "name": "Carlos Araujo"
+  }
+}
