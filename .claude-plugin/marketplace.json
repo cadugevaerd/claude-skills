@@ -171,9 +171,9 @@
     },
     {
       "name": "langsmith-evals",
-      "description": "Engenharia e auditoria LangSmith-first para datasets, evaluators, experiments, backtests, comparação de modelos e gates de promoção. Inclui Engineer e Auditor independentes, ambos fixados em Sonnet.",
+      "description": "Engenharia, Pytest determinístico e auditoria LangSmith-first para datasets, evaluators, experiments, backtests e gates. Inclui três agents Sonnet com fronteiras separadas.",
       "source": "./plugins/langsmith-evals",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "author": {
         "name": "Carlos Araujo"
       },
@@ -185,7 +185,8 @@
         "experiments",
         "backtesting",
         "llm-as-judge",
-        "langgraph"
+        "langgraph",
+        "pytest"
       ]
     }
   ]
