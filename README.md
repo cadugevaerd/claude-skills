@@ -12,7 +12,7 @@ Coleção de [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) 
 | **`rag-kag-decision`** | Decide quando usar RAG, KAG, GraphRAG ou abordagem híbrida conforme documentos, entidades, relações, regras, temporalidade, custo e risco. |
 | **`modelos-custo-beneficio`** | Consulta OpenRouter e lista até 5 candidatos para Model Engineering Eval, com reasoning controlável, throughput p75/p50 ≥60 t/s e variantes `:exacto`/`:nitro`; não decide runtime. |
 | **`facilitador-reunioes`** | Cria convites, objetivos claros, pré-briefing, roteiro de condução e próximos passos para reuniões objetivas. |
-| **`langsmith-evals`** | Engenharia e auditoria LangSmith-first para chatbots, RAG, agents, nodes e grafos. Inclui `langsmith-evals-engineer` e `langsmith-evals-auditor`, ambos fixados em `sonnet`. |
+| **`langsmith-evals`** | Prompt Engineering, engenharia e auditoria LangSmith-first. Inclui `langsmith-prompt-engineer`, `langsmith-evals-engineer` e `langsmith-evals-auditor`, fixados em `sonnet`. |
 
 ## Instalação
 
@@ -103,7 +103,7 @@ Reinicie o Claude Code (ou abra uma nova sessão).
 /rag-kag-decision <caso de uso, fontes de dados, risco e exemplos de perguntas>
 /modelos-custo-beneficio throughput_min=60 input=text,image tool_calls=true structured_outputs=true
 /facilitador-reunioes <tema, participantes, decisão esperada, contexto>
-/langsmith-evals <sistema ou mudança a avaliar; engineer|audit>
+/langsmith-evals <sistema ou mudança a avaliar; prompt|engineer|audit>
 ```
 
 ## Sobre as skills
@@ -139,7 +139,7 @@ Skill para combater reuniões vagas: valida se a reunião é necessária, transf
 
 ### langsmith-evals
 
-Usa LangSmith como control plane para Datasets, Examples, Experiments, Traces e Feedback, mantendo pytest e oráculos determinísticos no repositório. O `langsmith-evals-engineer` implementa e executa evals, comparações e backtests; o `langsmith-evals-auditor` revisa a evidência sem editar artefatos e emite `GO`, `NO-GO` ou `BLOCKED`. A separação evita que o autor da rubrica seja o único aprovador da promoção. Os dois subagentes declaram `model: sonnet` no frontmatter.
+Usa LangSmith como control plane para prompts, Datasets, Examples, Experiments, Traces e Feedback, mantendo pytest e oráculos determinísticos no repositório. O `langsmith-prompt-engineer` cria candidatos versionados e executa comparações pareadas; o `langsmith-evals-engineer` implementa e executa evals e backtests; o `langsmith-evals-auditor` revisa a evidência sem editar artefatos e emite `GO`, `NO-GO` ou `BLOCKED`. A separação evita self-certification. Os tres subagentes declaram `model: sonnet` no frontmatter.
 
 ### grillme-langgraph / grillme-gestor
 
