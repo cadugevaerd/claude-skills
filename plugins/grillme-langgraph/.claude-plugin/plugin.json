@@ -1,7 +1,7 @@
 {
   "name": "grillme-langgraph",
-  "version": "1.0.0",
-  "description": "Entrevista técnica que transforma a descrição de um processo no rascunho de um fluxo LangGraph (diagrama, State CRUE, tabela de nodes).",
+  "version": "1.1.0",
+  "description": "Entrevista técnica que decide se LangGraph é necessário e só então desenha o subfluxo justificado (diagrama, State CRUE, tabela de nodes).",
   "author": {
     "name": "Carlos Araujo"
   }
