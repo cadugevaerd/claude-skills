@@ -1,8 +1,6 @@
 {
   "name": "langsmith-evals",
-  "version": "1.0.0",
-  "description": "Engenharia e auditoria de evals agenticos LangSmith-first com agents Sonnet dedicados.",
-  "author": {
-    "name": "Carlos Araujo"
-  }
+  "version": "1.1.0",
+  "description": "Prompt Engineering, engenharia e auditoria de evals LangSmith-first com agents Sonnet dedicados.",
+  "author": {"name": "Carlos Araujo"}
 }
