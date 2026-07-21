@@ -10,7 +10,7 @@ Coleção de [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) 
 | **`grillme-langgraph`** | Entrevista técnica que transforma a descrição de um processo no rascunho de um fluxo **LangGraph** — diagrama do grafo, schema do State (Regra CRUE), tabela de nodes determinístico vs não-determinístico. |
 | **`grillme-gestor`** | Versão não-técnica da `grillme-langgraph`: o gestor descreve o processo em linguagem comum (sem jargão) e recebe **o mesmo** artefato técnico em markdown. |
 | **`rag-kag-decision`** | Decide quando usar RAG, KAG, GraphRAG ou abordagem híbrida conforme documentos, entidades, relações, regras, temporalidade, custo e risco. |
-| **`modelos-custo-beneficio`** | Consulta OpenRouter e lista até 5 candidatos para Model Engineering Eval, com reasoning controlável, throughput p75/p50 ≥60 t/s e variantes `:exacto`/`:nitro`; não decide runtime. |
+| **`modelos-custo-beneficio`** | Consulta OpenRouter e lista até 5 candidatos para Model Engineering Eval, com inteligência Artificial Analysis >35 via OpenRouter Benchmarks, reasoning controlável, throughput p75/p50 ≥60 t/s e variantes `:exacto`/`:nitro`; não decide runtime. |
 | **`facilitador-reunioes`** | Cria convites, objetivos claros, pré-briefing, roteiro de condução e próximos passos para reuniões objetivas. |
 | **`langsmith-evals`** | Prompt Engineering, engenharia e auditoria LangSmith-first. Inclui `langsmith-prompt-engineer`, `langsmith-evals-engineer` e `langsmith-evals-auditor`, fixados em `sonnet`. |
 
@@ -101,7 +101,7 @@ Reinicie o Claude Code (ou abra uma nova sessão).
 /grillme-langgraph     # design LangGraph — versão técnica
 /grillme-gestor        # design LangGraph — versão para o gestor
 /rag-kag-decision <caso de uso, fontes de dados, risco e exemplos de perguntas>
-/modelos-custo-beneficio throughput_min=60 input=text,image tool_calls=true structured_outputs=true
+/modelos-custo-beneficio throughput_min=60 intelligence_min=35 input=text,image tool_calls=true structured_outputs=true
 /facilitador-reunioes <tema, participantes, decisão esperada, contexto>
 /langsmith-evals <sistema ou mudança a avaliar; prompt|engineer|audit>
 ```
@@ -130,7 +130,7 @@ Framework de decisão para arquitetura de conhecimento em LLMs: avalia se o caso
 
 ### modelos-custo-beneficio
 
-Consulta a API do OpenRouter (`/models` + `/endpoints`) para listar até cinco candidatos ao Model Engineering Eval. Exige reasoning controlável, endpoint com throughput `p75 >= 60 t/s` (ou `p50` como fallback), capacidades solicitadas e modelo não gratuito. `tool_calls=true` emite `:exacto`; geração textual emite `:nitro`. A skill não executa Eval, não escolhe vencedor e não altera runtime.
+Consulta as APIs OpenRouter (`/models`, `/benchmarks` e `/endpoints`) para listar até cinco candidatos ao Model Engineering Eval. Exige índice Artificial Analysis estritamente maior que `35` (via OpenRouter Benchmarks, associação exata por `model_permaslug`), reasoning controlável, endpoint com throughput `p75 >= 60 t/s` (ou `p50` como fallback), capacidades solicitadas e modelo não gratuito. `tool_calls=true` emite `:exacto`; geração textual emite `:nitro`. A skill não executa Eval, não escolhe vencedor e não altera runtime.
 
 
 ### facilitador-reunioes

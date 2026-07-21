@@ -1,7 +1,7 @@
 {
   "name": "modelos-custo-beneficio",
-  "version": "0.2.0",
-  "description": "Seleciona até 5 candidatos OpenRouter para Model Engineering Eval: reasoning controlável, throughput hard >=60 t/s (p75; p50 fallback) e variantes :exacto/:nitro. Não executa Eval nem altera runtime. **PRÉ-REQUISITO:** `OPENROUTER_API_KEY` deve estar no ambiente (carregue via `op item get 'OpenRouter API Key' --vault 'Automação' --fields credential --reveal`).",
+  "version": "0.4.0",
+  "description": "Seleciona até 5 candidatos OpenRouter para Model Engineering Eval: inteligência Artificial Analysis >35 via OpenRouter Benchmarks, reasoning controlável, throughput hard >=60 t/s (p75; p50 fallback) e variantes :exacto/:nitro. Não executa Eval nem altera runtime. **PRÉ-REQUISITO:** `OPENROUTER_API_KEY` deve estar no ambiente.",
   "author": {
     "name": "Carlos Araujo"
   }
