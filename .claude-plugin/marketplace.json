@@ -135,9 +135,9 @@
     },
     {
       "name": "modelos-custo-beneficio",
-      "description": "Lista até 5 candidatos OpenRouter para Model Engineering Eval com gates obrigatórios de idioma nativo, Markdown, Tool Calls e antialucinação; não executa Eval nem altera runtime.",
+      "description": "Lista até 5 candidatos OpenRouter para Model Engineering Eval com inteligência Artificial Analysis >35 via OpenRouter Benchmarks, gates obrigatórios de idioma nativo, Markdown, Tool Calls e antialucinação; não executa Eval nem altera runtime.",
       "source": "./plugins/modelos-custo-beneficio",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "author": {
         "name": "Carlos Araujo"
       },
@@ -148,6 +148,7 @@
         "openrouter",
         "cost",
         "throughput",
+        "intelligence",
         "tool-calling",
         "structured-outputs"
       ]
