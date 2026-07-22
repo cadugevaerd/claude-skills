@@ -2,7 +2,7 @@
   "$schema": "https://api.claude.ai/schemas/marketplace-v1.json",
   "name": "claude-skills",
   "version": "1.0.0",
-  "description": "Marketplace de Agent Skills para Claude Code — backlog, code-review-cadu, code-debug, relatorio-gerencial, grillme-langgraph, grillme-gestor, rag-kag-decision, modelos-custo-beneficio, facilitador-reunioes e langsmith-evals",
+  "description": "Marketplace de Agent Skills para Claude Code — backlog, code-review-cadu, code-debug, relatorio-gerencial, grillme-langgraph, grillme-gestor, rag-kag-decision, modelos-custo-beneficio, facilitador-reunioes, langsmith-evals e prompt-only-agent",
   "owner": {
     "name": "Carlos Araujo",
     "email": "cadu.gevaerd@gmail.com"
@@ -189,6 +189,15 @@
         "llm-as-judge",
         "langgraph"
       ]
+    },
+    {
+      "name": "prompt-only-agent",
+      "description": "Entrevista curta para projetar um agente prompt-only e entrega um system prompt pronto para copiar e colar.",
+      "source": "./plugins/prompt-only-agent",
+      "version": "1.0.0",
+      "author": {"name": "Carlos Araujo"},
+      "category": "development",
+      "tags": ["prompt-engineering", "system-prompt", "agent", "interview", "prompt-only"]
     }
   ]
 }
