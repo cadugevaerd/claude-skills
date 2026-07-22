@@ -13,7 +13,7 @@ Coleção de [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) 
 | **`modelos-custo-beneficio`** | Consulta OpenRouter e lista até 5 candidatos para Model Engineering Eval, com inteligência Artificial Analysis >35 via OpenRouter Benchmarks, reasoning controlável, throughput p75/p50 ≥60 t/s e variantes `:exacto`/`:nitro`; não decide runtime. |
 | **`facilitador-reunioes`** | Cria convites, objetivos claros, pré-briefing, roteiro de condução e próximos passos para reuniões objetivas. |
 | **`langsmith-evals`** | Prompt Engineering, engenharia e auditoria LangSmith-first. Inclui `langsmith-prompt-engineer`, `langsmith-evals-engineer` e `langsmith-evals-auditor`, fixados em `sonnet`. |
-| **`prompt-only-agent`** | Faz uma entrevista curta, uma pergunta por vez, e entrega um system prompt em Markdown pronto para copiar e colar para um agente sem ferramentas. |
+| **`prompt-only-agent`** | Faz uma entrevista curta, uma pergunta por vez, e entrega um system prompt em Markdown de até **8.000 caracteres**, pronto para copiar e colar para um agente sem ferramentas. |
 
 ## Instalação
 
@@ -142,7 +142,7 @@ Skill para combater reuniões vagas: valida se a reunião é necessária, transf
 
 ### prompt-only-agent
 
-Conduz uma entrevista curta, uma pergunta por vez, para delimitar objetivo, entradas, escopo, formato, limites e qualidade. A saída é somente um system prompt em Markdown, autocontido e pronto para copiar e colar, sem assumir ferramentas ou acesso externo.
+Conduz uma entrevista curta, uma pergunta por vez, para delimitar objetivo, entradas, escopo, formato, limites e qualidade. A saída é somente um system prompt em Markdown, autocontido, de até **8.000 caracteres**, pronto para copiar e colar, sem assumir ferramentas ou acesso externo.
 
 ### langsmith-evals
 
