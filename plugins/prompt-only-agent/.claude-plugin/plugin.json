@@ -1,6 +1,6 @@
 {
   "name": "prompt-only-agent",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Entrevista curta para projetar um agente prompt-only e entrega um system prompt pronto para copiar e colar.",
   "author": {"name": "Carlos Araujo"}
 }

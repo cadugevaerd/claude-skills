@@ -192,9 +192,9 @@
     },
     {
       "name": "prompt-only-agent",
-      "description": "Entrevista curta para projetar um agente prompt-only e entrega um system prompt pronto para copiar e colar.",
+      "description": "Entrevista curta para projetar um agente prompt-only e entrega um system prompt de até 8.000 caracteres, pronto para copiar e colar.",
       "source": "./plugins/prompt-only-agent",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "author": {"name": "Carlos Araujo"},
       "category": "development",
       "tags": ["prompt-engineering", "system-prompt", "agent", "interview", "prompt-only"]
