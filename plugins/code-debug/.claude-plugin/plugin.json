@@ -1,7 +1,7 @@
 {
   "name": "code-debug",
-  "version": "1.0.0",
-  "description": "Debug disciplinado por causa raiz: reproduz comando, analisa logs, instrumenta quando necessario e entrega relatorio com causa comprovada e sugestao de fix.",
+  "version": "1.1.0",
+  "description": "Diagnostico diagnose-only: reproduz falhas, coleta evidencias, testa hipoteses e entrega relatorio de causa raiz sem executar correcoes.",
   "author": {
     "name": "Carlos Araujo"
   }
