@@ -2,7 +2,7 @@
   "$schema": "https://api.claude.ai/schemas/marketplace-v1.json",
   "name": "claude-skills",
   "version": "1.0.0",
-  "description": "Marketplace de Agent Skills para Claude Code — backlog, code-review-cadu, code-debug, relatorio-gerencial, grillme-langgraph, grillme-gestor, rag-kag-decision, modelos-custo-beneficio, facilitador-reunioes, langsmith-evals e prompt-only-agent",
+  "description": "Marketplace de Agent Skills para Claude Code — backlog, code-review-cadu, code-debug, relatorio-gerencial, grillme-langgraph, grillme-gestor, rag-kag-decision, modelos-custo-beneficio, facilitador-reunioes, langsmith-evals, prompt-only-agent e qa-planner",
   "owner": {
     "name": "Carlos Araujo",
     "email": "cadu.gevaerd@gmail.com"
@@ -198,6 +198,15 @@
       "author": {"name": "Carlos Araujo"},
       "category": "development",
       "tags": ["prompt-engineering", "system-prompt", "agent", "interview", "prompt-only"]
+    },
+    {
+      "name": "qa-planner",
+      "description": "Planeja QA para uma branch: analisa requisitos, define estratégia e cria cenários rastreáveis em QA.md, sem executar testes. Outra IA executa o plano e registra evidências em QA-RESULTS.md.",
+      "source": "./plugins/qa-planner",
+      "version": "1.0.0",
+      "author": {"name": "Carlos Araujo"},
+      "category": "development",
+      "tags": ["qa", "test-plan", "test-cases", "quality-assurance", "regression", "handoff"]
     }
   ]
 }

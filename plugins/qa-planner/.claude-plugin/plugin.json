@@ -1,0 +1,8 @@
+{
+  "name": "qa-planner",
+  "version": "1.0.0",
+  "description": "Planeja QA para uma branch: analisa requisitos, define estratégia e cria cenários rastreáveis em QA.md, sem executar testes.",
+  "author": {
+    "name": "Carlos Araujo"
+  }
+}
