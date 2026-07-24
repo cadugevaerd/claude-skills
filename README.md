@@ -14,6 +14,7 @@ Coleção de [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) 
 | **`facilitador-reunioes`** | Cria convites, objetivos claros, pré-briefing, roteiro de condução e próximos passos para reuniões objetivas. |
 | **`langsmith-evals`** | Prompt Engineering, engenharia e auditoria LangSmith-first. Inclui `langsmith-prompt-engineer`, `langsmith-evals-engineer` e `langsmith-evals-auditor`, fixados em `sonnet`. |
 | **`prompt-only-agent`** | Faz uma entrevista curta, uma pergunta por vez, e entrega um system prompt em Markdown de até **8.000 caracteres**, pronto para copiar e colar para um agente sem ferramentas. |
+| **`qa-planner`** | Analisa requisitos e o diff da branch, define estratégia e cria `QA.md` rastreável para outra IA executar — sem rodar testes. |
 
 ## Instalação
 
@@ -37,6 +38,7 @@ claude plugin install modelos-custo-beneficio@claude-skills
 claude plugin install facilitador-reunioes@claude-skills
 claude plugin install langsmith-evals@claude-skills
 claude plugin install prompt-only-agent@claude-skills
+claude plugin install qa-planner@claude-skills
 ```
 
 Ou dentro de uma sessão do Claude Code:
@@ -107,6 +109,7 @@ Reinicie o Claude Code (ou abra uma nova sessão).
 /facilitador-reunioes <tema, participantes, decisão esperada, contexto>
 /langsmith-evals <sistema ou mudança a avaliar; prompt|engineer|audit>
 /prompt-only-agent <ideia ou objetivo do agente prompt-only>
+/qa-planner branch=feat/oauth base=main
 ```
 
 ## Sobre as skills
@@ -144,8 +147,14 @@ Skill para combater reuniões vagas: valida se a reunião é necessária, transf
 
 Conduz uma entrevista curta, uma pergunta por vez, para delimitar objetivo, entradas, escopo, formato, limites e qualidade. A saída é somente um system prompt em Markdown, autocontido, de até **8.000 caracteres**, pronto para copiar e colar, sem assumir ferramentas ou acesso externo.
 
-### langsmith-evals
+### qa-planner
 
+Executa somente as três primeiras etapas de QA: análise de requisitos,
+planejamento dos testes e criação de cenários. Analisa a branch e grava um `QA.md`
+rastreável no local adequado do repositório-alvo, sem executar testes. Outra IA
+consome o plano e registra resultados reais em `QA-RESULTS.md`.
+
+### langsmith-evals
 Usa LangSmith como control plane para prompts, Datasets, Examples, Experiments, Traces e Feedback, mantendo pytest e oráculos determinísticos no repositório. O `langsmith-prompt-engineer` cria candidatos versionados e executa comparações pareadas; o `langsmith-evals-engineer` implementa e executa evals e backtests; o `langsmith-evals-auditor` revisa a evidência sem editar artefatos e emite `GO`, `NO-GO` ou `BLOCKED`. A separação evita self-certification. Os tres subagentes declaram `model: sonnet` no frontmatter.
 
 ### grillme-langgraph / grillme-gestor
