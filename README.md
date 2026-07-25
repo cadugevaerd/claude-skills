@@ -15,6 +15,7 @@ Coleção de [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) 
 | **`langsmith-evals`** | Prompt Engineering, engenharia e auditoria LangSmith-first. Inclui `langsmith-prompt-engineer`, `langsmith-evals-engineer` e `langsmith-evals-auditor`, fixados em `sonnet`. |
 | **`prompt-only-agent`** | Faz uma entrevista curta, uma pergunta por vez, e entrega um system prompt em Markdown de até **8.000 caracteres**, pronto para copiar e colar para um agente sem ferramentas. |
 | **`qa-planner`** | Analisa requisitos e o diff da branch, define estratégia e cria `QA.md` rastreável para outra IA executar — sem rodar testes. |
+| **`whatsapp-business-platform`** | Projeta e opera integrações oficiais Meta: Cloud API, Technology Provider, Embedded Signup v4, Coexistence App+API, múltiplas WABAs/números, webhooks e tokens. |
 
 ## Instalação
 
@@ -39,6 +40,7 @@ claude plugin install facilitador-reunioes@claude-skills
 claude plugin install langsmith-evals@claude-skills
 claude plugin install prompt-only-agent@claude-skills
 claude plugin install qa-planner@claude-skills
+claude plugin install whatsapp-business-platform@claude-skills
 ```
 
 Ou dentro de uma sessão do Claude Code:
@@ -110,6 +112,8 @@ Reinicie o Claude Code (ou abra uma nova sessão).
 /langsmith-evals <sistema ou mudança a avaliar; prompt|engineer|audit>
 /prompt-only-agent <ideia ou objetivo do agente prompt-only>
 /qa-planner branch=feat/oauth base=main
+/whatsapp-business-platform modo=provider planejar onboarding multiempresa
+/whatsapp-business-platform modo=coexistence verificar App manual + Cloud API
 ```
 
 ## Sobre as skills
@@ -153,6 +157,10 @@ Executa somente as três primeiras etapas de QA: análise de requisitos,
 planejamento dos testes e criação de cenários. Analisa a branch e grava um `QA.md`
 rastreável no local adequado do repositório-alvo, sem executar testes. Outra IA
 consome o plano e registra resultados reais em `QA-RESULTS.md`.
+
+### whatsapp-business-platform
+
+Separa App ID, Business ID, WABA ID, Phone Number ID e número E.164; orienta verificação de Technology Provider, onboarding multiempresa por Embedded Signup v4, Coexistence entre WhatsApp Business App e Cloud API, webhooks multi-tenant e segurança de tokens. Reconsulta as fontes oficiais antes de afirmar versões, permissões, limites ou elegibilidade.
 
 ### langsmith-evals
 Usa LangSmith como control plane para prompts, Datasets, Examples, Experiments, Traces e Feedback, mantendo pytest e oráculos determinísticos no repositório. O `langsmith-prompt-engineer` cria candidatos versionados e executa comparações pareadas; o `langsmith-evals-engineer` implementa e executa evals e backtests; o `langsmith-evals-auditor` revisa a evidência sem editar artefatos e emite `GO`, `NO-GO` ou `BLOCKED`. A separação evita self-certification. Os tres subagentes declaram `model: sonnet` no frontmatter.
