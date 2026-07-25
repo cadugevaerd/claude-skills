@@ -1,0 +1,8 @@
+{
+  "name": "whatsapp-business-platform",
+  "version": "1.0.0",
+  "description": "Projeta e opera integrações Meta WhatsApp Business Platform, incluindo Cloud API, Technology Provider, Embedded Signup v4 e Coexistence.",
+  "author": {
+    "name": "Carlos Araujo"
+  }
+}

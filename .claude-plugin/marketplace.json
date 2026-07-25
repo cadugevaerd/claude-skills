@@ -2,7 +2,7 @@
   "$schema": "https://api.claude.ai/schemas/marketplace-v1.json",
   "name": "claude-skills",
   "version": "1.0.0",
-  "description": "Marketplace de Agent Skills para Claude Code — backlog, code-review-cadu, code-debug, relatorio-gerencial, grillme-langgraph, grillme-gestor, rag-kag-decision, modelos-custo-beneficio, facilitador-reunioes, langsmith-evals, prompt-only-agent e qa-planner",
+  "description": "Marketplace de Agent Skills para Claude Code — backlog, code-review-cadu, code-debug, relatorio-gerencial, grillme-langgraph, grillme-gestor, rag-kag-decision, modelos-custo-beneficio, facilitador-reunioes, langsmith-evals, prompt-only-agent, qa-planner e whatsapp-business-platform",
   "owner": {
     "name": "Carlos Araujo",
     "email": "cadu.gevaerd@gmail.com"
@@ -207,6 +207,15 @@
       "author": {"name": "Carlos Araujo"},
       "category": "development",
       "tags": ["qa", "test-plan", "test-cases", "quality-assurance", "regression", "handoff"]
+    },
+    {
+      "name": "whatsapp-business-platform",
+      "description": "Projeta e opera integrações Meta WhatsApp Business Platform, incluindo Cloud API, Technology Provider, Embedded Signup v4 e Coexistence.",
+      "source": "./plugins/whatsapp-business-platform",
+      "version": "1.0.0",
+      "author": {"name": "Carlos Araujo"},
+      "category": "development",
+      "tags": ["whatsapp", "meta", "cloud-api", "technology-provider", "embedded-signup", "coexistence"]
     }
   ]
 }
