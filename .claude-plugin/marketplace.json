@@ -10,9 +10,9 @@
   "plugins": [
     {
       "name": "grill-with-docs",
-      "description": "Conduz uma entrevista arquitetural com uma pergunta por vez, documentação externa autoritativa, ADRs, desconhecidos retomáveis, roadmap e auditoria GO/NO-GO/BLOCKED.",
+      "description": "Conduz decisões arquiteturais em loop auditável: uma pergunta por vez, fronteira DQ, ROADMAP por fases, ADRs, checkpoints SAFETY_STOP e auditoria GO/NO-GO/BLOCKED.",
       "source": "./plugins/grill-with-docs",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "author": {"name": "Carlos Araujo"},
       "category": "development",
       "tags": ["architecture", "adr", "evidence", "roadmap", "audit"]
