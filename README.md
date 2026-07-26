@@ -7,7 +7,7 @@ Coleção de [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) 
 | **`backlog`** | Fonte da verdade GLOBAL de itens diferidos (`~/.backlog/backlog.json`): um backlog único para todos os repositórios, identificado por `repo` + `BL-NNNN`. Registra, tria, promove, resolve, descarta e consolida duplicatas auditáveis com `merge`; gera `consolidado_backlog.md` por clusters de negócio, em linguagem não técnica, com problema e resolução por atividade. |
 | **`code-review-cadu`** | Code review de PR com **veredicto GO/NO-GO por finding** (sobre o merge): NO-GO = merge bloqueado, corrigir nesta PR; GO = merge pode seguir, finding diferível → backlog GLOBAL (`~/.backlog/backlog.json` via skill `/backlog`, após confirmação). Fork do plugin oficial `code-review` da Anthropic (Apache-2.0). |
 | **`code-debug`** | Diagnóstico diagnose-only: recebe comando/log, reproduz, coleta evidências, testa hipóteses e entrega relatório sem executar correções. |
-| **`grill-with-docs`** | Conduz uma pergunta arquitetural por vez, ancorada em fontes autoritativas, e mantém `CONTEXT.md`, ADRs, backlog, roadmap e auditoria GO/NO-GO/BLOCKED. |
+| **`grill-with-docs`** | Conduz uma pergunta arquitetural por vez em loop auditável: fronteira `DQ-NNNN`, `ROADMAP` por fases, handoff isolado e `SAFETY_STOP` retomável. |
 | **`grillme-langgraph`** | Entrevista técnica que transforma a descrição de um processo no rascunho de um fluxo **LangGraph** — diagrama do grafo, schema do State (Regra CRUE), tabela de nodes determinístico vs não-determinístico. |
 | **`grillme-gestor`** | Versão não-técnica da `grillme-langgraph`: o gestor descreve o processo em linguagem comum (sem jargão) e recebe **o mesmo** artefato técnico em markdown. |
 | **`rag-kag-decision`** | Decide quando usar RAG, KAG, GraphRAG ou abordagem híbrida conforme documentos, entidades, relações, regras, temporalidade, custo e risco. |
@@ -106,6 +106,9 @@ Reinicie o Claude Code (ou abra uma nova sessão).
 /backlog merge undo evt-20260619-0001 # reverter um merge somente se o estado ainda corresponder
 /code-review-cadu 42   # review da PR #42 com veredicto GO/NO-GO + backlog
 /code-debug <comando> # debug disciplinado por causa raiz
+/grill-with-docs iniciar brownfield
+/grill-with-docs retomar ./docs
+/grill-with-docs auditar ./docs
 /grillme-langgraph     # design LangGraph — versão técnica
 /grillme-gestor        # design LangGraph — versão para o gestor
 /rag-kag-decision <caso de uso, fontes de dados, risco e exemplos de perguntas>
@@ -119,6 +122,9 @@ Reinicie o Claude Code (ou abra uma nova sessão).
 ```
 
 ## Sobre as skills
+
+### grill-with-docs
+Conduz decisões arquiteturais em loop auditável. Mantém uma pergunta atômica por rodada, `DECISION-FRONTIER.md` com DQs, `ROUND-LOG.jsonl`, `ROADMAP por fases` com `FASE-NNN`, ADRs, backlog e handoffs isolados. Repetição, ausência de progresso, expansão de escopo ou budget acionam `SAFETY_STOP` retomável; apenas `COMPLETE + GO` libera uma fase para `specify`.
 
 ### backlog
 
