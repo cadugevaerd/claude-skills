@@ -1,0 +1,6 @@
+{
+  "name": "grill-with-docs",
+  "version": "1.0.0",
+  "description": "Entrevista decisões arquiteturais orientada por evidências e mantém contexto, ADRs, backlog e roadmap auditáveis.",
+  "author": {"name": "Carlos Araujo"}
+}

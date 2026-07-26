@@ -2,12 +2,21 @@
   "$schema": "https://api.claude.ai/schemas/marketplace-v1.json",
   "name": "claude-skills",
   "version": "1.0.0",
-  "description": "Marketplace de Agent Skills para Claude Code — backlog, code-review-cadu, code-debug, relatorio-gerencial, grillme-langgraph, grillme-gestor, rag-kag-decision, modelos-custo-beneficio, facilitador-reunioes, langsmith-evals, prompt-only-agent, qa-planner e whatsapp-business-platform",
+  "description": "Marketplace de Agent Skills para Claude Code — backlog, code-review-cadu, code-debug, relatorio-gerencial, grill-with-docs, grillme-langgraph, grillme-gestor, rag-kag-decision, modelos-custo-beneficio, facilitador-reunioes, langsmith-evals, prompt-only-agent, qa-planner e whatsapp-business-platform",
   "owner": {
     "name": "Carlos Araujo",
     "email": "cadu.gevaerd@gmail.com"
   },
   "plugins": [
+    {
+      "name": "grill-with-docs",
+      "description": "Conduz uma entrevista arquitetural com uma pergunta por vez, documentação externa autoritativa, ADRs, desconhecidos retomáveis, roadmap e auditoria GO/NO-GO/BLOCKED.",
+      "source": "./plugins/grill-with-docs",
+      "version": "1.0.0",
+      "author": {"name": "Carlos Araujo"},
+      "category": "development",
+      "tags": ["architecture", "adr", "evidence", "roadmap", "audit"]
+    },
     {
       "name": "backlog",
       "description": "Fonte da verdade GLOBAL de itens diferidos (~/.backlog/backlog.json): um backlog único para TODOS os repos, com o repositório-alvo (`repo`) persistido em cada item. Registra, tria, promove, resolve e descarta; `/backlog merge` propõe e consolida duplicatas somente no mesmo repo, com confirmação, histórico auditável e undo fechado. `/backlog consolidado` gera visão por cluster e criticidade visual, com resumo de prioridade. Faz bootstrap seguro, migra TODOs/FIXMEs do CWD e `format` re-tria severidade/rank 1–100 por repo.",

@@ -7,6 +7,7 @@ Coleção de [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) 
 | **`backlog`** | Fonte da verdade GLOBAL de itens diferidos (`~/.backlog/backlog.json`): um backlog único para todos os repositórios, identificado por `repo` + `BL-NNNN`. Registra, tria, promove, resolve, descarta e consolida duplicatas auditáveis com `merge`; gera `consolidado_backlog.md` por clusters de negócio, em linguagem não técnica, com problema e resolução por atividade. |
 | **`code-review-cadu`** | Code review de PR com **veredicto GO/NO-GO por finding** (sobre o merge): NO-GO = merge bloqueado, corrigir nesta PR; GO = merge pode seguir, finding diferível → backlog GLOBAL (`~/.backlog/backlog.json` via skill `/backlog`, após confirmação). Fork do plugin oficial `code-review` da Anthropic (Apache-2.0). |
 | **`code-debug`** | Diagnóstico diagnose-only: recebe comando/log, reproduz, coleta evidências, testa hipóteses e entrega relatório sem executar correções. |
+| **`grill-with-docs`** | Conduz uma pergunta arquitetural por vez, ancorada em fontes autoritativas, e mantém `CONTEXT.md`, ADRs, backlog, roadmap e auditoria GO/NO-GO/BLOCKED. |
 | **`grillme-langgraph`** | Entrevista técnica que transforma a descrição de um processo no rascunho de um fluxo **LangGraph** — diagrama do grafo, schema do State (Regra CRUE), tabela de nodes determinístico vs não-determinístico. |
 | **`grillme-gestor`** | Versão não-técnica da `grillme-langgraph`: o gestor descreve o processo em linguagem comum (sem jargão) e recebe **o mesmo** artefato técnico em markdown. |
 | **`rag-kag-decision`** | Decide quando usar RAG, KAG, GraphRAG ou abordagem híbrida conforme documentos, entidades, relações, regras, temporalidade, custo e risco. |
@@ -32,6 +33,7 @@ claude plugin marketplace add cadugevaerd/claude-skills
 claude plugin install backlog@claude-skills
 claude plugin install code-review-cadu@claude-skills
 claude plugin install code-debug@claude-skills
+claude plugin install grill-with-docs@claude-skills
 claude plugin install grillme-gestor@claude-skills
 claude plugin install grillme-langgraph@claude-skills
 claude plugin install rag-kag-decision@claude-skills
