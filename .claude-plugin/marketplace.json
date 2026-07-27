@@ -19,20 +19,20 @@
     },
     {
       "name": "backlog",
-      "description": "Fonte da verdade GLOBAL de itens diferidos (~/.backlog/backlog.json): um backlog único para TODOS os repos, com o repositório-alvo (`repo`) persistido em cada item. Registra, tria, promove, resolve e descarta; `/backlog merge` propõe e consolida duplicatas somente no mesmo repo, com confirmação, histórico auditável e undo fechado. `/backlog consolidado` gera visão por cluster e criticidade visual, com resumo de prioridade. Faz bootstrap seguro, migra TODOs/FIXMEs do CWD e `format` re-tria severidade/rank 1–100 por repo.",
+      "description": "Backlog v2 multi-repositório via backlogctl: estados universais, contextos de prioridade expiráveis, propostas formatadas com confirmação humana e auditoria de decisões.",
       "source": "./plugins/backlog",
-      "version": "1.4.1",
+      "version": "2.0.1",
       "author": {
         "name": "Carlos Araujo"
       },
       "category": "productivity",
       "tags": [
         "backlog",
-        "todo",
-        "debt",
-        "triage",
-        "speckit",
-        "workflow"
+        "priority",
+        "context",
+        "format",
+        "audit",
+        "backlogctl"
       ]
     },
     {
