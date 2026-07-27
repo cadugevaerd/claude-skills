@@ -1,6 +1,6 @@
 {
   "name": "backlog",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Backlog v2: múltiplos backlogs, estados universais, contexto de prioridade expirável, propostas de formato e operações auditáveis via backlogctl.",
   "author": { "name": "Carlos Araujo" },
   "license": "MIT",
