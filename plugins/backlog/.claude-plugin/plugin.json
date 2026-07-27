@@ -1,8 +1,9 @@
 {
   "name": "backlog",
-  "version": "1.4.1",
-  "description": "Fonte da verdade GLOBAL de itens diferidos (~/.backlog/backlog.json): backlog único para todos os repositórios, com `repo` por item. Registra, tria, promove, resolve, descarta e consolida duplicatas auditáveis com `/backlog merge`; gera `consolidado_backlog.md` por cluster e criticidade visual, com resumo de prioridade, problema e resolução em linguagem não técnica; faz bootstrap seguro, varre TODOs soltos e mantém rank 1–100 por repo via `format`.",
-  "author": {
-    "name": "Carlos Araujo"
-  }
+  "version": "2.0.1",
+  "description": "Backlog v2: múltiplos backlogs, estados universais, contexto de prioridade expirável, propostas de formato e operações auditáveis via backlogctl.",
+  "author": { "name": "Carlos Araujo" },
+  "license": "MIT",
+  "keywords": ["backlog", "prioridade", "auditoria", "backlogctl"],
+  "skills": "./skills"
 }

@@ -1,6 +1,6 @@
 ---
 name: "code-review-cadu"
-description: "Code review de pull request com veredicto GO/NO-GO por finding sobre o merge — NO-GO = merge bloqueado, corrigir nesta PR; GO = merge pode seguir, finding diferível registrado no backlog global (~/.backlog/backlog.json, carimbando o repo-alvo, via skill /backlog). Use quando for revisar uma PR do GitHub e quiser a triagem automática dos findings entre 'bloqueia merge' e 'diferir para o backlog'. Fork personalizado (Cadu) do plugin oficial code-review da Anthropic."
+description: "Code review de pull request com veredicto GO/NO-GO por finding sobre o merge — findings GO confirmadas podem ser registradas via backlogctl após seleção explícita do backlog associado. Use quando for revisar uma PR do GitHub e quiser a triagem automática dos findings entre 'bloqueia merge' e 'diferir para o backlog'. Fork personalizado (Cadu) do plugin oficial code-review da Anthropic."
 argument-hint: "<número ou URL da PR>"
 ---
 
@@ -9,48 +9,66 @@ argument-hint: "<número ou URL da PR>"
 Fork of the official Anthropic `code-review` plugin (Apache-2.0 — see the
 plugin's LICENSE file), extended with: a **GO/NO-GO verdict per finding** —
 the verdict is about the MERGE (**NO-GO** = merge blocked, fix in this PR;
-**GO** = merge may proceed, finding is deferrable) — and **backlog
-integration** for deferred items (GO → the global `~/.backlog/backlog.json` via the
-`/backlog` skill).
+a **GO** issue may be registered only after explicit confirmation, binding selection via `backlogctl --json backlog list`, and `backlogctl --json item add`; never write `~/.backlog/backlog.json` or SQLite directly.
 
 Provide a code review for the given pull request.
 
+## Non-negotiable behavior: exhaustive parallel review
+
+This skill MUST optimize for finding **all merge-relevant issues in one review**,
+not for the first obvious blocker. Do not drip-feed one NO-GO per execution.
+
+- Launch the reviewer passes below as **separate subagents in parallel** whenever
+  the runtime exposes a subagent/task tool. Do not simulate parallel review with a
+  single sequential self-pass unless subagents are unavailable.
+- A NO-GO found by one reviewer is **not** a stopping condition. Continue all
+  reviewers, collect all candidate findings, deduplicate them, score them, and
+  only then write the PR comment.
+- Launch scoring passes as **one parallel batch: one scorer per candidate
+  finding**. Do not score only the first/highest-confidence finding.
+- The PR comment MUST be a single consolidated review containing every finding
+  that survives scoring. Never post one finding while other reviewers or scorers
+  have not completed.
+- If subagents are unavailable, state that limitation in the private reasoning
+  flow and still perform the same collect-then-score-then-comment sequence; never
+  fall back to first-finding-only behavior.
+
 To do this, follow these steps precisely:
 
-1. Use a Haiku agent to check if the pull request (a) is closed, (b) is a draft, (c) does not need a code review (eg. because it is an automated pull request, or is very simple and obviously ok), or (d) already has a code review from you from earlier. If so, do not proceed.
-2. Use another Haiku agent to give you a list of file paths to (but not the contents of) any relevant CLAUDE.md files from the codebase: the root CLAUDE.md file (if one exists), as well as any CLAUDE.md files in the directories whose files the pull request modified
-3. Use a Haiku agent to view the pull request, and ask the agent to return a summary of the change
-4. Then, launch 5 parallel Sonnet agents to independently code review the change — plus 2 ADDITIONAL parallel Sonnet agents (#6 and #7) IF the project uses LangGraph / LangChain / LangSmith (detect first with a fast grep for `langgraph`, `langchain` or `langsmith` in dependency manifests — `pyproject.toml`, `requirements*.txt`, `package.json` — or in the imports of the changed files). The agents should do the following, then return a list of issues and the reason each issue was flagged (eg. CLAUDE.md adherence, bug, historical git context, etc.):
-   a. Agent #1: Audit the changes to make sure they comply with the CLAUDE.md. Note that CLAUDE.md is guidance for Claude as it writes code, so not all instructions will be applicable during code review.
+1. Use a lightweight reviewer pass or subagent to check if the pull request (a) is closed, (b) is a draft, (c) does not need a code review (eg. because it is an automated pull request, or is very simple and obviously ok), or (d) already has a code review from you from earlier. If so, do not proceed.
+2. Use another lightweight reviewer pass or subagent to give you a list of file paths to (but not the contents of) any relevant instruction files from the codebase: root `AGENTS.md`/`CLAUDE.md` files if they exist, as well as any such files in directories whose files the pull request modified.
+3. Use a lightweight reviewer pass or subagent to view the pull request, and ask it to return a summary of the change.
+4. Then, launch 5 parallel reviewer subagents to independently code review the change — plus 2 ADDITIONAL parallel reviewer subagents (#6 and #7) IF the project uses LangGraph / LangChain / LangSmith (detect first with a fast grep for `langgraph`, `langchain` or `langsmith` in dependency manifests — `pyproject.toml`, `requirements*.txt`, `package.json` — or in the imports of the changed files). These MUST be independent reviewer agents, not a single agent doing five personas in sequence. Wait for **all** reviewer subagents to finish before deciding whether the review has findings. The reviewers should do the following, then return a list of issues and the reason each issue was flagged (eg. instruction-file adherence, bug, historical git context, etc.):
+   a. Reviewer #1: Audit the changes to make sure they comply with the relevant `AGENTS.md`/`CLAUDE.md` instructions. Note that these files are guidance for coding agents as they write code, so not all instructions will be applicable during code review.
    b. Agent #2: Read the file changes in the pull request, then do a shallow scan for obvious bugs. Avoid reading extra context beyond the changes, focusing just on the changes themselves. Focus on large bugs, and avoid small issues and nitpicks. Ignore likely false positives.
    c. Agent #3: Read the git blame and history of the code modified, to identify any bugs in light of that historical context
    d. Agent #4: Read previous pull requests that touched these files, and check for any comments on those pull requests that may also apply to the current pull request.
    e. Agent #5: Read code comments in the modified files, and make sure the changes in the pull request comply with any guidance in the comments.
-   f. Agent #6 (LangGraph/LangChain projects only): Validate that the changes follow the **Thinking in LangGraph** methodology. Check: minimal state carrying RAW data, not formatted text (CRUE rule); routing via `status` flag + State-Check (NEVER `interrupt()` for handoff); the deterministic/non-deterministic boundary is explicit — critical guarantees (validation, authorization, persistence invariants) implemented in deterministic code/subgraphs, never delegated to ReAct/`create_agent` discretion; fixed flows (ingestion, validation pipelines) as deterministic subgraphs; internal routing via `Command(update=..., goto=...)`; error handling discriminated (transient → `RetryPolicy`; recoverable → LLM loop; structural/unexpected → `raise`, never silently swallowed); internal (non user-facing) LLM `.invoke()` calls suppress AG-UI streaming (`config={"metadata": {"emit-messages": False, "emit-tool-calls": False}}`). If the repo's CLAUDE.md or constitution define these conventions (eg. a "Thinking in LangGraph" section), cite the specific rule violated.
-   g. Agent #7 (LangGraph/LangChain projects only; return no issues if the diff does not touch code that uses `ChatOpenRouter`): Validate that the changes respect the **official ChatOpenRouter integration docs** — the agent MUST first fetch https://docs.langchain.com/oss/python/integrations/chat/openrouter (WebFetch) and review the diff against it. Check at minimum: multimodal content blocks use the canonical format (PDF/documents MUST be `{"type": "file", "base64"/"url": ..., "mime_type": "application/pdf"}` blocks — NEVER `image`/`image_url`, whose mime_type only accepts image/jpeg|png|gif|webp); model fallback chains send payloads valid for ALL models in the chain (not just the primary — eg. a payload Gemini tolerates but Anthropic/Bedrock/Vertex reject 400 is a bug); reasoning budget vs `max_tokens` (reasoning tokens count against the cap → `finish_reason=length` with empty tool calls and no exception); `with_structured_output` method/strict choices; `openrouter_provider` routing params. If the repo has a `/chatopenrouter` skill, use it as the quick-reference.
-5. For each issue found in #4, launch a parallel Haiku agent that takes the PR, issue description, and list of CLAUDE.md files (from step 2), and returns a score to indicate the agent's level of confidence for whether the issue is real or false positive. To do that, the agent should score each issue on a scale from 0-100, indicating its level of confidence. For issues that were flagged due to CLAUDE.md instructions, the agent should double check that the CLAUDE.md actually calls out that issue specifically. The scale is (give this rubric to the agent verbatim):
+   f. Reviewer #6 (LangGraph/LangChain projects only): Validate that the changes follow the **Thinking in LangGraph** methodology. Check: minimal state carrying RAW data, not formatted text (CRUE rule); routing via `status` flag + State-Check (NEVER `interrupt()` for handoff); the deterministic/non-deterministic boundary is explicit — critical guarantees (validation, authorization, persistence invariants) implemented in deterministic code/subgraphs, never delegated to ReAct/`create_agent` discretion; fixed flows (ingestion, validation pipelines) as deterministic subgraphs; internal routing via `Command(update=..., goto=...)`; error handling discriminated (transient → `RetryPolicy`; recoverable → LLM loop; structural/unexpected → `raise`, never silently swallowed); internal (non user-facing) LLM `.invoke()` calls suppress AG-UI streaming (`config={"metadata": {"emit-messages": False, "emit-tool-calls": False}}`). If the repo's instruction files or constitution define these conventions (eg. a "Thinking in LangGraph" section), cite the specific rule violated.
+   g. Reviewer #7 (LangGraph/LangChain projects only; return no issues if the diff does not touch code that uses `ChatOpenRouter`): Validate that the changes respect the **official ChatOpenRouter integration docs** — the reviewer MUST first fetch https://docs.langchain.com/oss/python/integrations/chat/openrouter with the available web/documentation tool and review the diff against it. Check at minimum: multimodal content blocks use the canonical format (PDF/documents MUST be `{"type": "file", "base64"/"url": ..., "mime_type": "application/pdf"}` blocks — NEVER `image`/`image_url`, whose mime_type only accepts image/jpeg|png|gif|webp); model fallback chains send payloads valid for ALL models in the chain (not just the primary — eg. a payload Gemini tolerates but Anthropic/Bedrock/Vertex reject 400 is a bug); reasoning budget vs `max_tokens` (reasoning tokens count against the cap → `finish_reason=length` with empty tool calls and no exception); `with_structured_output` method/strict choices; `openrouter_provider` routing params. If the repo has a `/chatopenrouter` skill, use it as the quick-reference.
+5. Merge the reviewer outputs into a candidate list before scoring: deduplicate equivalent issues, preserve every distinct bug/risk, and keep provenance (`reviewer_id`, reason, file/line evidence). Then, for **each distinct candidate issue** found in #4, launch a parallel scoring subagent that takes the PR, issue description, evidence/provenance, and list of instruction files (from step 2), and returns a score to indicate its level of confidence for whether the issue is real or false positive. The scoring subagents MUST run as one batch; do not wait for one score before spawning the next, and do not stop because one issue scores as NO-GO-worthy. To do that, the scoring pass should score each issue on a scale from 0-100, indicating its level of confidence. For issues that were flagged due to instruction-file rules, the scoring pass should double check that the instruction file actually calls out that issue specifically. The scale is (give this rubric to the scoring pass verbatim):
    a. 0: Not confident at all. This is a false positive that doesn't stand up to light scrutiny, or is a pre-existing issue.
-   b. 25: Somewhat confident. This might be a real issue, but may also be a false positive. The agent wasn't able to verify that it's a real issue. If the issue is stylistic, it is one that was not explicitly called out in the relevant CLAUDE.md.
-   c. 50: Moderately confident. The agent was able to verify this is a real issue, but it might be a nitpick or not happen very often in practice. Relative to the rest of the PR, it's not very important.
-   d. 75: Highly confident. The agent double checked the issue, and verified that it is very likely it is a real issue that will be hit in practice. The existing approach in the PR is insufficient. The issue is very important and will directly impact the code's functionality, or it is an issue that is directly mentioned in the relevant CLAUDE.md.
-   e. 100: Absolutely certain. The agent double checked the issue, and confirmed that it is definitely a real issue, that will happen frequently in practice. The evidence directly confirms this.
+   b. 25: Somewhat confident. This might be a real issue, but may also be a false positive. The scoring pass wasn't able to verify that it's a real issue. If the issue is stylistic, it is one that was not explicitly called out in the relevant instruction file.
+   c. 50: Moderately confident. The scoring pass was able to verify this is a real issue, but it might be a nitpick or not happen very often in practice. Relative to the rest of the PR, it's not very important.
+   d. 75: Highly confident. The scoring pass double checked the issue, and verified that it is very likely it is a real issue that will be hit in practice. The existing approach in the PR is insufficient. The issue is very important and will directly impact the code's functionality, or it is an issue that is directly mentioned in the relevant instruction file.
+   e. 100: Absolutely certain. The scoring pass double checked the issue, and confirmed that it is definitely a real issue, that will happen frequently in practice. The evidence directly confirms this.
 
-   The scoring agent MUST end its reply with a final line in exactly this format: `SCORE: <integer 0-100>` — no prose after it.
+   The scoring pass MUST end its reply with a final line in exactly this format: `SCORE: <integer 0-100>` — no prose after it.
 6. Coerce each score, then filter:
    a. **Total coercion, never case enumeration.** The score arrives in an LLM reply — an open domain. Do not parse it by enumerating expected shapes ("if it looks like `NN`, elif `NN/100`, ..."). Coerce ANY reply to an integer: take the number from the final `SCORE:` line if present (match is case-insensitive and tolerates trailing prose; within that line the first number wins); otherwise take the last number anywhere in the reply; accept floats (`82.5` → 82), fractions (`85/100` → 85) and percents (`85%` → 85); clamp the result to [0, 100].
-   b. **Never drop a finding on a parse failure (fail-loud).** If no number can be extracted at all, re-run that scoring agent once; if the reply still cannot be coerced, treat the score as indeterminate: KEEP the finding, mark it `[score: indeterminate]`, and surface it to the user for a manual call — never silently discard it. A silent drop corrupts the review. Indeterminate findings get no verdict in step 7 and are NOT posted in the PR comment (step 9); list them only in the conversation for the user to decide.
+   b. **Never drop a finding on a parse failure (fail-loud).** If no number can be extracted at all, re-run that scoring pass once; if the reply still cannot be coerced, treat the score as indeterminate: KEEP the finding, mark it `[score: indeterminate]`, and surface it to the user for a manual call — never silently discard it. A silent drop corrupts the review. Indeterminate findings get no verdict in step 7 and are NOT posted in the PR comment (step 9); list them only in the conversation for the user to decide.
    c. Filter out issues with a coerced score below 75. If no issues remain (and none are indeterminate), do not proceed.
-7. Assign a **verdict about the merge** to each issue that passed the filter, with a one-line justification:
+7. Assign a **verdict about the merge** to each issue that passed the filter, with a one-line justification. This is a batch operation over the full surviving list; never emit or post a verdict until every surviving issue has a verdict:
    - **NO-GO** — the merge must NOT proceed with this issue pending: fix it in this PR. Criteria: correctness, security, data loss/corruption, regression, or breaking the contract with real infrastructure.
    - **GO** — the merge may proceed: the issue is deferrable with no merge risk. Criteria: cleanup, refactor, technical debt, efficiency/style improvement, unlikely edge case.
-8. Use a Haiku agent to repeat the eligibility check from #1, to make sure that the pull request is still eligible for code review.
-9. Use the gh bash command to comment back on the pull request with the result. When writing your comment, keep in mind to:
+8. Use a lightweight reviewer pass or subagent to repeat the eligibility check from #1, to make sure that the pull request is still eligible for code review.
+9. Use the gh bash command to comment back on the pull request with the consolidated result. Exactly one PR review comment should be posted per invocation, after all reviewer and scorer subagents have completed. When writing your comment, keep in mind to:
    a. Keep your output brief
    b. Avoid emojis
    c. Link and cite relevant code, files, and URLs
    d. Prefix every issue with its verdict: `**[NO-GO]**` (merge blocked, fix in this PR) or `**[GO → backlog]**` (merge may proceed, deferred)
-10. Backlog flow for the GO issues (NEVER register automatically):
-    a. After posting the PR comment, present the user (in the conversation) a summary table of every finding that passed the filter, rendered in the box-drawing style below — header rule `━`, row separators `─`; columns `# · finding · verdict · justification`; order all `NO-GO` rows first, then `GO`; wrap long cells across lines keeping the columns aligned. The `justification` cites the rule/spec/criterion driving the verdict (eg. `US2/FR-004/SC-003`, a CLAUDE.md rule, a constitution clause). This table is **conversation-only** — do NOT put it in the PR comment (box-drawing does not render on GitHub; the PR comment keeps the markdown list format from step 9).
+10. Backlog flow for confirmed GO issues (never register speculation):
+    a. After posting the PR comment, present the user (in the conversation) a summary table of every finding that passed the filter, rendered in the box-drawing style below — header rule `━`, row separators `─`; columns `# · finding · verdict · justification`; order all `NO-GO` rows first, then `GO`; wrap long cells across lines keeping the columns aligned. The `justification` cites the rule/spec/criterion driving the verdict (eg. `US2/FR-004/SC-003`, an `AGENTS.md`/`CLAUDE.md` rule, a constitution clause). This table is **conversation-only** — do NOT put it in the PR comment (box-drawing does not render on GitHub; the PR comment keeps the markdown list format from step 9).
 
        ```
         #      finding                                            verdict    justification
@@ -66,8 +84,8 @@ To do this, follow these steps precisely:
        ```
 
     b. Ask the user to confirm which GO issues should go to the backlog.
-    c. After the user's OK, register the confirmed GO issues in batch in the global backlog (`~/.backlog/backlog.json`, stamping the target `repo`) via the `/backlog` skill, and report the generated `BL-NNNN` id next to each finding.
-    d. If the global `~/.backlog/backlog.json` does not exist yet, the `/backlog` skill bootstraps it before registering.
+   c. Only for each confirmed, non-speculative finding, discover the associated backlog with `backlogctl --json backlog list --db PATH` and select the entry whose `bound_path` matches the reviewed repository. If there is no binding, report structured `added: false`, explain that no item was added, and ask the user to select a backlog explicitly; never guess.
+   d. After explicit confirmation and a selected binding, register with `backlogctl --json item add --code CODE --title ... --criticality ... --category ... --db PATH`. Capture and show the CLI envelope (`result`, `operation`, `changed`, `data`, `warnings`, `next_action`) for every attempted addition. Never register speculation or generate code as a substitute.
 
 Examples of false positives, for steps 4 and 5:
 
@@ -75,18 +93,19 @@ Examples of false positives, for steps 4 and 5:
 - Something that looks like a bug but is not actually a bug
 - Pedantic nitpicks that a senior engineer wouldn't call out
 - Issues that a linter, typechecker, or compiler would catch (eg. missing or incorrect imports, type errors, broken tests, formatting issues, pedantic style issues like newlines). No need to run these build steps yourself -- it is safe to assume that they will be run separately as part of CI.
-- General code quality issues (eg. lack of test coverage, general security issues, poor documentation), unless explicitly required in CLAUDE.md
-- Issues that are called out in CLAUDE.md, but explicitly silenced in the code (eg. due to a lint ignore comment)
+- General code quality issues (eg. lack of test coverage, general security issues, poor documentation), unless explicitly required in `AGENTS.md`/`CLAUDE.md`
+- Issues that are called out in `AGENTS.md`/`CLAUDE.md`, but explicitly silenced in the code (eg. due to a lint ignore comment)
 - Changes in functionality that are likely intentional or are directly related to the broader change
 - Real issues, but on lines that the user did not modify in their pull request
 
 Notes:
 
-- Every field you consume from an agent's reply (eligibility, summary, scores) is an open-domain LLM payload: demand a fixed output format in the agent's prompt, coerce totally on consumption (never by enumerating expected cases), and treat an uncoercible reply as indeterminate + visible — never as a silent default.
+- Every field you consume from a reviewer/scoring reply (eligibility, summary, reviewer findings, scores) is an open-domain LLM payload: demand a fixed output format in the prompt, coerce totally on consumption (never by enumerating expected cases), and treat an uncoercible reply as indeterminate + visible — never as a silent default.
+- Drip reviews are forbidden: do not stop at the first NO-GO, do not post partial results, and do not ask the user to rerun the skill to discover additional findings. The expected output is one consolidated comment with all high-confidence findings discovered by the parallel reviewers.
 - Do not check build signal or attempt to build or typecheck the app. These will run separately, and are not relevant to your code review.
 - Use `gh` to interact with Github (eg. to fetch a pull request, or to create inline comments), rather than web fetch
 - Make a todo list first
-- You must cite and link each bug (eg. if referring to a CLAUDE.md, you must link it)
+- You must cite and link each bug (eg. if referring to an `AGENTS.md` or `CLAUDE.md`, you must link it)
 - For your final comment, follow the following format precisely (assuming for this example that you found 3 issues):
 
 ---
@@ -95,11 +114,11 @@ Notes:
 
 Found 3 issues (2 NO-GO / 1 GO):
 
-1. **[NO-GO]** <brief description of bug> (CLAUDE.md says "<...>")
+1. **[NO-GO]** <brief description of bug> (`AGENTS.md` says "<...>")
 
-<link to file and line with full sha1 + line range for context, note that you MUST provide the full sha and not use bash here, eg. https://github.com/anthropics/claude-code/blob/1d54823877c4de72b2316a64032a54afc404e619/README.md#L13-L17>
+<link to file and line with full sha1 + line range for context, note that you MUST provide the full sha and not use bash here>
 
-2. **[NO-GO]** <brief description of bug> (some/other/CLAUDE.md says "<...>")
+2. **[NO-GO]** <brief description of bug> (some/other/AGENTS.md says "<...>")
 
 <link to file and line with full sha1 + line range for context>
 
@@ -107,7 +126,7 @@ Found 3 issues (2 NO-GO / 1 GO):
 
 <link to file and line with full sha1 + line range for context>
 
-🤖 Generated with [Claude Code](https://claude.ai/code)
+Generated with Codex.
 
 <sub>- If this code review was useful, please react with 👍. Otherwise, react with 👎.</sub>
 
@@ -119,9 +138,9 @@ Found 3 issues (2 NO-GO / 1 GO):
 
 ### Code review
 
-No issues found. Checked for bugs and CLAUDE.md compliance.
+No issues found. Checked for bugs and instruction-file compliance.
 
-🤖 Generated with [Claude Code](https://claude.ai/code)
+Generated with Codex.
 
 - When linking to code, follow the following format precisely, otherwise the Markdown preview won't render correctly: https://github.com/anthropics/claude-cli-internal/blob/c21d3c10bc8e898b7ac1a2d745bdc9bc4e423afe/package.json#L10-L15
   - Requires full git sha
