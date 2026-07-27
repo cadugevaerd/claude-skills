@@ -1,0 +1,17 @@
+{
+  "description": "Instala backlogctl verificado quando uma sessão Claude inicia.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/ensure-backlogctl.js", "--hook"],
+            "timeout": 120
+          }
+        ]
+      }
+    ]
+  }
+}
