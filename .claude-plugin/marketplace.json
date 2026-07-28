@@ -19,9 +19,9 @@
     },
     {
       "name": "backlog",
-      "description": "Backlog v2 multi-repositório via backlogctl with verified automatic SessionStart bootstrap, expiring priority contexts, confirmed format proposals and decision audit.",
+      "description": "Backlog v2 via backlogctl 2.1 with automatic verified bootstrap, merge, import v3, TODO opt-in and safe update.",
       "source": "./plugins/backlog",
-      "version": "2.3.0",
+      "version": "2.4.0",
       "author": {
         "name": "Carlos Araujo"
       },
