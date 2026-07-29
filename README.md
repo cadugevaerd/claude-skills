@@ -135,6 +135,8 @@ Reinicie o Claude Code (ou abra uma nova sessão).
 7. `PLAN-CONTEXT.md`;
 8. `handoffs/FASE-NNN-SPECIFY-HANDOFF.md`.
 
+O bootstrap automatizado cria somente `WORKFLOW.md`; a skill materializa os outros sete artefatos a partir dos templates, após as aprovações aplicáveis e conforme a entrevista produz evidência. Ele nunca fabrica uma constitution ou decisão.
+
 `DECISION-FRONTIER.md`, `ROUND-LOG.jsonl`, `state.json` e `AUDIT.md` são auxiliares auditáveis. `/grill-with-docs auditar` é read-only. Hooks `SessionStart`/`SubagentStart` apenas injetam contexto. Repetição, ausência de progresso, expansão de escopo ou budget acionam `SAFETY_STOP` retomável. A skill termina em `PLAN_ONLY_STOP` sem chamar `specify`, implementar código ou criar branch, commit ou merge; o executor posterior entrega somente o handoff selecionado ao `specify`. Não há alias nem merge automático.
 
 ### backlog
