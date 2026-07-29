@@ -1,6 +1,7 @@
 {
   "name": "grill-with-docs",
-  "version": "1.1.0",
-  "description": "Conduz decisões arquiteturais em loop auditável, com ROADMAP por fases, fronteira de decisões e checkpoints seguros.",
-  "author": {"name": "Carlos Araujo"}
+  "version": "1.2.0",
+  "description": "Conduz decisões arquiteturais em loop auditável: /grill-with-docs iniciar|retomar cria e valida WORKFLOW.md e gera oito entradas Spec Kit; auditar é read-only. Hooks SessionStart/SubagentStart apenas injetam contexto; specify recebe somente o handoff, com PLAN_ONLY_STOP e sem alias ou merge automático.",
+  "author": {"name": "Carlos Araujo"},
+  "hooks": "./hooks/hooks.json"
 }

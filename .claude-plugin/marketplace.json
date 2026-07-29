@@ -10,9 +10,9 @@
   "plugins": [
     {
       "name": "grill-with-docs",
-      "description": "Conduz decisões arquiteturais em loop auditável: uma pergunta por vez, fronteira DQ, ROADMAP por fases, ADRs, checkpoints SAFETY_STOP e auditoria GO/NO-GO/BLOCKED.",
+      "description": "Conduz decisões arquiteturais em loop auditável: /grill-with-docs iniciar|retomar cria e valida WORKFLOW.md e gera oito entradas Spec Kit; auditar é read-only. Hooks SessionStart/SubagentStart apenas injetam contexto; specify recebe somente o handoff, com PLAN_ONLY_STOP e sem alias ou merge automático.",
       "source": "./plugins/grill-with-docs",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "author": {"name": "Carlos Araujo"},
       "category": "development",
       "tags": ["architecture", "adr", "evidence", "roadmap", "audit"]

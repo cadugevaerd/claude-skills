@@ -7,7 +7,7 @@ Coleção de [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) 
 | **`backlog`** | Fonte da verdade GLOBAL de itens diferidos (`~/.backlog/backlog.json`): um backlog único para todos os repositórios, identificado por `repo` + `BL-NNNN`. Registra, tria, promove, resolve, descarta e consolida duplicatas auditáveis com `merge`; gera `consolidado_backlog.md` por clusters de negócio, em linguagem não técnica, com problema e resolução por atividade. |
 | **`code-review-cadu`** | Code review de PR com **veredicto GO/NO-GO por finding** (sobre o merge): NO-GO = merge bloqueado, corrigir nesta PR; GO = merge pode seguir, finding diferível → backlog GLOBAL (`~/.backlog/backlog.json` via skill `/backlog`, após confirmação). Fork do plugin oficial `code-review` da Anthropic (Apache-2.0). |
 | **`code-debug`** | Diagnóstico diagnose-only: recebe comando/log, reproduz, coleta evidências, testa hipóteses e entrega relatório sem executar correções. |
-| **`grill-with-docs`** | Conduz uma pergunta arquitetural por vez em loop auditável: fronteira `DQ-NNNN`, `ROADMAP` por fases, handoff isolado e `SAFETY_STOP` retomável. |
+| **`grill-with-docs`** | Conduz uma pergunta arquitetural por vez em loop auditável: `/grill-with-docs iniciar|retomar` cria e valida `WORKFLOW.md` e gera oito entradas Spec Kit; `/grill-with-docs auditar` é read-only. Hooks `SessionStart`/`SubagentStart` apenas injetam contexto; `specify` recebe somente o handoff e `PLAN_ONLY_STOP` encerra o planejamento sem alias ou merge automático. |
 | **`grillme-langgraph`** | Entrevista técnica que transforma a descrição de um processo no rascunho de um fluxo **LangGraph** — diagrama do grafo, schema do State (Regra CRUE), tabela de nodes determinístico vs não-determinístico. |
 | **`grillme-gestor`** | Versão não-técnica da `grillme-langgraph`: o gestor descreve o processo em linguagem comum (sem jargão) e recebe **o mesmo** artefato técnico em markdown. |
 | **`rag-kag-decision`** | Decide quando usar RAG, KAG, GraphRAG ou abordagem híbrida conforme documentos, entidades, relações, regras, temporalidade, custo e risco. |
@@ -124,7 +124,7 @@ Reinicie o Claude Code (ou abra uma nova sessão).
 ## Sobre as skills
 
 ### grill-with-docs
-Conduz decisões arquiteturais em loop auditável. Mantém uma pergunta atômica por rodada, `DECISION-FRONTIER.md` com DQs, `ROUND-LOG.jsonl`, `ROADMAP por fases` com `FASE-NNN`, ADRs, backlog e handoffs isolados. Repetição, ausência de progresso, expansão de escopo ou budget acionam `SAFETY_STOP` retomável; apenas `COMPLETE + GO` libera uma fase para `specify`.
+`/grill-with-docs iniciar|retomar` cria e valida `WORKFLOW.md` e gera oito entradas Spec Kit para decisões arquiteturais em loop auditável. Mantém uma pergunta atômica por rodada, `DECISION-FRONTIER.md` com DQs, `ROUND-LOG.jsonl`, `ROADMAP` por fases, ADRs, backlog e handoffs isolados. `/grill-with-docs auditar` é read-only. Hooks `SessionStart`/`SubagentStart` apenas injetam contexto; `specify` recebe somente o handoff. Repetição, ausência de progresso, expansão de escopo ou budget acionam `PLAN_ONLY_STOP` retomável; não há alias nem merge automático.
 
 ### backlog
 
