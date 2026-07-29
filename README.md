@@ -7,7 +7,7 @@ Coleção de [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) 
 | **`backlog`** | Fonte da verdade GLOBAL de itens diferidos (`~/.backlog/backlog.json`): um backlog único para todos os repositórios, identificado por `repo` + `BL-NNNN`. Registra, tria, promove, resolve, descarta e consolida duplicatas auditáveis com `merge`; gera `consolidado_backlog.md` por clusters de negócio, em linguagem não técnica, com problema e resolução por atividade. |
 | **`code-review-cadu`** | Code review de PR com **veredicto GO/NO-GO por finding** (sobre o merge): NO-GO = merge bloqueado, corrigir nesta PR; GO = merge pode seguir, finding diferível → backlog GLOBAL (`~/.backlog/backlog.json` via skill `/backlog`, após confirmação). Fork do plugin oficial `code-review` da Anthropic (Apache-2.0). |
 | **`code-debug`** | Diagnóstico diagnose-only: recebe comando/log, reproduz, coleta evidências, testa hipóteses e entrega relatório sem executar correções. |
-| **`grill-with-docs`** | Conduz uma pergunta arquitetural por vez em loop auditável: `/grill-with-docs iniciar|retomar` cria e valida `WORKFLOW.md` e gera oito entradas Spec Kit; `/grill-with-docs auditar` é read-only. Hooks `SessionStart`/`SubagentStart` apenas injetam contexto; `specify` recebe somente o handoff e `PLAN_ONLY_STOP` encerra o planejamento sem alias ou merge automático. |
+| **`grill-with-docs`** | Conduz uma pergunta arquitetural por vez: `iniciar|retomar` valida oito entradas Spec Kit; `auditar` é read-only; hooks só injetam contexto e `PLAN_ONLY_STOP` encerra antes de `specify` ou implementação. |
 | **`grillme-langgraph`** | Entrevista técnica que transforma a descrição de um processo no rascunho de um fluxo **LangGraph** — diagrama do grafo, schema do State (Regra CRUE), tabela de nodes determinístico vs não-determinístico. |
 | **`grillme-gestor`** | Versão não-técnica da `grillme-langgraph`: o gestor descreve o processo em linguagem comum (sem jargão) e recebe **o mesmo** artefato técnico em markdown. |
 | **`rag-kag-decision`** | Decide quando usar RAG, KAG, GraphRAG ou abordagem híbrida conforme documentos, entidades, relações, regras, temporalidade, custo e risco. |
@@ -124,7 +124,18 @@ Reinicie o Claude Code (ou abra uma nova sessão).
 ## Sobre as skills
 
 ### grill-with-docs
-`/grill-with-docs iniciar|retomar` cria e valida `WORKFLOW.md` e gera oito entradas Spec Kit para decisões arquiteturais em loop auditável. Mantém uma pergunta atômica por rodada, `DECISION-FRONTIER.md` com DQs, `ROUND-LOG.jsonl`, `ROADMAP` por fases, ADRs, backlog e handoffs isolados. `/grill-with-docs auditar` é read-only. Hooks `SessionStart`/`SubagentStart` apenas injetam contexto; `specify` recebe somente o handoff. Repetição, ausência de progresso, expansão de escopo ou budget acionam `PLAN_ONLY_STOP` retomável; não há alias nem merge automático.
+`/grill-with-docs iniciar|retomar` cria ou valida `WORKFLOW.md` e materializa incrementalmente oito entradas Spec Kit:
+
+1. `.specify/memory/constitution.md`;
+2. `WORKFLOW.md`;
+3. `CONTEXT.md`;
+4. `docs/adr/`;
+5. `ROADMAP.md`;
+6. `DECISION-BACKLOG.md`;
+7. `PLAN-CONTEXT.md`;
+8. `handoffs/FASE-NNN-SPECIFY-HANDOFF.md`.
+
+`DECISION-FRONTIER.md`, `ROUND-LOG.jsonl`, `state.json` e `AUDIT.md` são auxiliares auditáveis. `/grill-with-docs auditar` é read-only. Hooks `SessionStart`/`SubagentStart` apenas injetam contexto. Repetição, ausência de progresso, expansão de escopo ou budget acionam `SAFETY_STOP` retomável. A skill termina em `PLAN_ONLY_STOP` sem chamar `specify`, implementar código ou criar branch, commit ou merge; o executor posterior entrega somente o handoff selecionado ao `specify`. Não há alias nem merge automático.
 
 ### backlog
 
