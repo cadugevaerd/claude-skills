@@ -1,6 +1,6 @@
 {
   "name": "grill-with-docs",
-  "version": "1.1.0",
-  "description": "Conduz decisões arquiteturais em loop auditável, com ROADMAP por fases, fronteira de decisões e checkpoints seguros.",
+  "version": "1.2.0",
+  "description": "Conduz decisões arquiteturais em loop auditável: iniciar|retomar valida oito entradas Spec Kit; auditar é read-only. Hooks apenas injetam contexto; PLAN_ONLY_STOP encerra antes de specify ou implementação.",
   "author": {"name": "Carlos Araujo"}
 }
