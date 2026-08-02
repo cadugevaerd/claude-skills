@@ -452,6 +452,20 @@ def write_bundle_staging(root: Path, work_id: str, metadata: dict[str, Any], fil
         raise
 
 
+def rename_child(parent: Path, source: Path, target: Path) -> None:
+    """Rename children through a verified directory FD to avoid parent-path substitution."""
+    flags = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLLOW", 0)
+    directory_fd = os.open(parent, flags)
+    try:
+        parent_stat = os.stat(parent, follow_symlinks=False)
+        fd_stat = os.fstat(directory_fd)
+        if (fd_stat.st_dev, fd_stat.st_ino) != (parent_stat.st_dev, parent_stat.st_ino):
+            raise CliFailure(EXIT_BLOCKED, "BLOCKED", "DIRECTORY-RACE", str(parent))
+        os.rename(source.name, target.name, src_dir_fd=directory_fd, dst_dir_fd=directory_fd)
+    finally:
+        os.close(directory_fd)
+
+
 def read_local_bundle(root: Path, item: Path) -> ItemBundle:
     reject_symlink_chain(root, item, allow_missing=False)
     if item.is_symlink() or not item.is_dir():
@@ -464,6 +478,29 @@ def read_local_bundle(root: Path, item: Path) -> ItemBundle:
             relative = path.relative_to(item).as_posix()
             files[relative] = path.read_bytes()
     return bundle_from_files(item.name, files, str(item))
+
+
+def read_external_bundle(item: Path) -> ItemBundle:
+    """Read an artifact root that is intentionally separate from the Git project root."""
+    absolute = Path(os.path.abspath(item))
+    if Path(os.path.realpath(absolute)) != absolute or absolute.is_symlink() or not absolute.is_dir():
+        raise CliFailure(EXIT_BLOCKED, "BLOCKED", "UNSAFE-ARTIFACT-ROOT", str(item))
+    files: dict[str, bytes] = {}
+    for path in sorted(absolute.rglob("*")):
+        if path.is_symlink():
+            raise CliFailure(EXIT_BLOCKED, "BLOCKED", "SYMLINK-REJECTED", str(path))
+        if path.is_file():
+            files[path.relative_to(absolute).as_posix()] = path.read_bytes()
+    raw = files.get("WORK-ITEM.json")
+    if raw is None:
+        raise CliFailure(EXIT_NO_GO, "NO-GO", "WORK-ITEM-MISSING", str(absolute))
+    try:
+        metadata = json.loads(raw.decode("utf-8"))
+    except (UnicodeError, json.JSONDecodeError) as exc:
+        raise CliFailure(EXIT_NO_GO, "NO-GO", "WORK-ITEM-INVALID", str(absolute)) from exc
+    immutable = validate_metadata(metadata)
+    work_id = immutable["work_id"]
+    return ItemBundle(work_id, files, str(absolute), bundle_fingerprint(files), metadata)
 
 
 def bundle_fingerprint(files: dict[str, bytes]) -> str:
@@ -506,7 +543,7 @@ def init_command(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
         metadata = metadata_document(immutable, files)
         staging = write_bundle_staging(root, work_id, metadata, files)
         try:
-            os.rename(staging, target)
+            rename_child(target.parent, staging, target)
         except FileExistsError:
             shutil.rmtree(staging, ignore_errors=True)
             bundle = read_local_bundle(root, target)
@@ -521,10 +558,10 @@ def audit_command(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
     root = project_root(args.project_root or args.root)
     if not args.artifact_root and not args.work_id:
         raise CliFailure(EXIT_BLOCKED, "BLOCKED", "INVALID-ARGUMENTS", "--work-id or --artifact-root is required")
-    item = Path(args.artifact_root).resolve() if args.artifact_root else root / ".grill" / "work-items" / args.work_id
+    item = Path(os.path.abspath(args.artifact_root)) if args.artifact_root else root / ".grill" / "work-items" / args.work_id
     if not item.is_dir():
         return {"verdict": "NO-GO", "code": "WORK-ITEM-MISSING"}, EXIT_NO_GO
-    before = read_local_bundle(root, item)
+    before = read_external_bundle(item) if args.artifact_root else read_local_bundle(root, item)
     immutable = validate_metadata(before.metadata, before.work_id)
     constitutional = validate_constitution_check(root, before.files, immutable.get("constitution", {}))
     auditor = Path(__file__).with_name("audit_decisions.py")
@@ -538,7 +575,7 @@ def audit_command(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
         receipt = json.loads(process.stdout.strip())
     except json.JSONDecodeError:
         return {"verdict": "NO-GO", "code": "AUDITOR-INVALID-OUTPUT"}, EXIT_NO_GO
-    after = read_local_bundle(root, item)
+    after = read_external_bundle(item) if args.artifact_root else read_local_bundle(root, item)
     if before.fingerprint != after.fingerprint:
         return {"verdict": "NO-GO", "code": "AUDITOR-MUTATED-WORK-ITEM"}, EXIT_NO_GO
     exit_code = process.returncode if process.returncode in {0, 1, 2} else EXIT_NO_GO
@@ -749,14 +786,14 @@ def replace_global_directory(root: Path, roadmap: bytes, audit: bytes) -> None:
         (staging / "ROADMAP.md").write_bytes(roadmap)
         (staging / "AUDIT.md").write_bytes(audit)
         if target.exists():
-            os.rename(target, backup)
-        os.rename(staging, target)
+            rename_child(grill, target, backup)
+        rename_child(grill, staging, target)
         shutil.rmtree(backup, ignore_errors=True)
     except Exception:
         if target.exists() and backup.exists():
             shutil.rmtree(target, ignore_errors=True)
         if backup.exists() and not target.exists():
-            os.rename(backup, target)
+            rename_child(grill, backup, target)
         shutil.rmtree(staging, ignore_errors=True)
         raise
 
@@ -786,19 +823,24 @@ def reconcile_command(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
         return preview, EXIT_NO_GO
     roadmap, audit = global_documents(items, qualified, preview)
     global_dir = root / ".grill" / "global"
-    if global_dir.is_dir() and not global_dir.is_symlink():
-        current_roadmap = (global_dir / "ROADMAP.md").read_bytes() if (global_dir / "ROADMAP.md").is_file() else None
-        current_audit = (global_dir / "AUDIT.md").read_bytes() if (global_dir / "AUDIT.md").is_file() else None
-        if current_roadmap == roadmap and current_audit == audit:
-            disallowed = dirty_paths(root) - MANAGED_GLOBAL
-            if disallowed:
-                return {**preview, "verdict": "BLOCKED", "code": "DIRTY-WORKTREE", "dirty": sorted(disallowed)}, EXIT_BLOCKED
-            return {**preview, "verdict": "REUSED", "code": "OK"}, EXIT_OK
-    dirty = dirty_paths(root)
-    if dirty:
-        return {**preview, "verdict": "BLOCKED", "code": "DIRTY-WORKTREE", "dirty": sorted(dirty)}, EXIT_BLOCKED
-    replace_global_directory(root, roadmap, audit)
-    return {**preview, "verdict": "APPLIED", "code": "OK"}, EXIT_OK
+    lock = acquire_lock(root, "global-reconciliation", global_dir)
+    try:
+        if global_dir.is_dir() and not global_dir.is_symlink():
+            current_roadmap = (global_dir / "ROADMAP.md").read_bytes() if (global_dir / "ROADMAP.md").is_file() else None
+            current_audit = (global_dir / "AUDIT.md").read_bytes() if (global_dir / "AUDIT.md").is_file() else None
+            if current_roadmap == roadmap and current_audit == audit:
+                disallowed = dirty_paths(root) - MANAGED_GLOBAL
+                disallowed = {path for path in disallowed if not path.startswith(".grill/locks/global-reconciliation.lock/")}
+                if disallowed:
+                    return {**preview, "verdict": "BLOCKED", "code": "DIRTY-WORKTREE", "dirty": sorted(disallowed)}, EXIT_BLOCKED
+                return {**preview, "verdict": "REUSED", "code": "OK"}, EXIT_OK
+        dirty = {path for path in dirty_paths(root) if not path.startswith(".grill/locks/global-reconciliation.lock/")}
+        if dirty:
+            return {**preview, "verdict": "BLOCKED", "code": "DIRTY-WORKTREE", "dirty": sorted(dirty)}, EXIT_BLOCKED
+        replace_global_directory(root, roadmap, audit)
+        return {**preview, "verdict": "APPLIED", "code": "OK"}, EXIT_OK
+    finally:
+        shutil.rmtree(lock, ignore_errors=True)
 
 
 def collect_legacy(root: Path) -> tuple[dict[str, bytes], dict[str, str]]:
@@ -822,10 +864,14 @@ def collect_legacy(root: Path) -> tuple[dict[str, bytes], dict[str, str]]:
 
     for name in LEGACY_FILES:
         path = root / name
+        if path.is_symlink():
+            raise CliFailure(EXIT_BLOCKED, "BLOCKED", "LEGACY-SYMLINK", str(path))
         if path.exists():
             add(path, name)
     for directory_name, destination_name in (("docs/adr", "docs/adr"), ("adrs", "docs/adr"), ("handoffs", "handoffs")):
         directory = root / directory_name
+        if directory.is_symlink():
+            raise CliFailure(EXIT_BLOCKED, "BLOCKED", "LEGACY-SYMLINK", directory_name)
         if not directory.exists():
             continue
         reject_symlink_chain(root, directory, allow_missing=False)
@@ -873,7 +919,7 @@ def migrate_command(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
         metadata = metadata_document(immutable, files, migration={"source_hashes": hashes, "source_paths": sources})
         staging = write_bundle_staging(root, work_id, metadata, files)
         try:
-            os.rename(staging, target)
+            rename_child(target.parent, staging, target)
         except Exception:
             shutil.rmtree(staging, ignore_errors=True)
             raise

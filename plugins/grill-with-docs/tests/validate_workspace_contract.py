@@ -217,6 +217,21 @@ class WorkspaceV2Contract(unittest.TestCase):
         self.assertIsInstance(payload["audit"], dict)
         self.assertEqual(before, snapshot(item))
 
+    def test_audit_supports_artifact_root_outside_project_root(self) -> None:
+        item = self._init_item(work_id="external-artifacts")
+        temporary = tempfile.TemporaryDirectory()
+        self.extra.append(temporary)
+        external = Path(temporary.name) / "arbitrary-directory-name"
+        shutil.copytree(item, external)
+        before = snapshot(external)
+        process, payload = invoke(
+            "audit", self.root, "--artifact-root", external, "--project-root", self.root
+        )
+        self.assertIn(process.returncode, {0, 1, 2})
+        self.assertNotEqual(process.returncode, 3)
+        self.assertEqual(payload["work_id"], "external-artifacts")
+        self.assertEqual(before, snapshot(external))
+
     def test_constitution_pass_and_not_applicable_are_accepted(self) -> None:
         self._constitution()
         item = self._init_item(work_id="constitutional")
@@ -357,6 +372,17 @@ class WorkspaceV2Contract(unittest.TestCase):
         self.assertEqual(before_mtime, {path.name: path.stat().st_mtime_ns for path in global_dir.iterdir()})
         self.assertNotIn(b"\\n", (global_dir / "ROADMAP.md").read_bytes())
 
+    def test_reconcile_concurrent_apply_is_serialized(self) -> None:
+        item = self._init_item(); self._mark_complete(item); self._commit_all(self.root)
+        command = ("reconcile", self.root, "--apply", "--integration-branch", "main")
+        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+            results = list(executor.map(lambda _index: invoke(*command), range(4)))
+        self.assertTrue(all(process.returncode == 0 for process, _payload in results))
+        verdicts = [payload["verdict"] for _process, payload in results]
+        self.assertEqual(verdicts.count("APPLIED"), 1)
+        self.assertEqual(verdicts.count("REUSED"), 3)
+        self.assertEqual(set(snapshot(self.root / ".grill/global")), {"AUDIT.md", "ROADMAP.md"})
+
     def test_migrate_preview_apply_preserves_files_directories_and_reuses(self) -> None:
         originals = {
             "CONTEXT.md": b"legacy context\n",
@@ -402,6 +428,23 @@ class WorkspaceV2Contract(unittest.TestCase):
         process, _payload = invoke("migrate", linked, "--type", "fix", "--slug", "link", "--work-id", "link-migration", "--apply")
         self.assertEqual(process.returncode, 2)
         self.assertFalse((linked / ".grill/work-items/link-migration").exists())
+
+    def test_migrate_rejects_broken_file_and_directory_symlinks(self) -> None:
+        broken_file = self._new_repo()
+        (broken_file / "CONTEXT.md").symlink_to(broken_file / "does-not-exist")
+        process, payload = invoke(
+            "migrate", broken_file, "--type", "fix", "--slug", "broken", "--work-id", "broken-file", "--apply"
+        )
+        self.assertEqual((process.returncode, payload["code"]), (2, "LEGACY-SYMLINK"))
+        self.assertFalse((broken_file / ".grill/work-items/broken-file").exists())
+        broken_directory = self._new_repo()
+        (broken_directory / "docs").mkdir()
+        (broken_directory / "docs/adr").symlink_to(broken_directory / "missing-directory", target_is_directory=True)
+        process, payload = invoke(
+            "migrate", broken_directory, "--type", "fix", "--slug", "broken", "--work-id", "broken-dir", "--apply"
+        )
+        self.assertEqual((process.returncode, payload["code"]), (2, "LEGACY-SYMLINK"))
+        self.assertFalse((broken_directory / ".grill/work-items/broken-dir").exists())
 
 
 if __name__ == "__main__":
