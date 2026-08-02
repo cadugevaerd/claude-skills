@@ -10,12 +10,12 @@
   "plugins": [
     {
       "name": "grill-with-docs",
-      "description": "Conduz decisões arquiteturais em loop auditável: iniciar|retomar valida oito entradas Spec Kit; auditar é read-only. Hooks apenas injetam contexto; PLAN_ONLY_STOP encerra antes de specify ou implementação.",
+      "description": "Isola um grill por feature/fix/hotfix em .grill/work-items, aplica gate constitucional read-only e reconcilia ROADMAP global determinístico antes de PLAN_ONLY_STOP.",
       "source": "./plugins/grill-with-docs",
-      "version": "1.2.0",
+      "version": "2.0.0",
       "author": {"name": "Carlos Araujo"},
       "category": "development",
-      "tags": ["architecture", "adr", "evidence", "roadmap", "audit"]
+      "tags": ["architecture", "adr", "worktree", "constitution", "roadmap", "audit", "reconciliation"]
     },
     {
       "name": "backlog",

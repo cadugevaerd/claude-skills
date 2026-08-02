@@ -425,6 +425,40 @@ class AuditorContract(unittest.TestCase):
         self.assertEqual(result.stdout, "NO-GO\n- invalid UTF-8 input\n")
         self.assertNotIn("Traceback", result.stderr)
 
+    def test_v2_separates_artifacts_and_project_governance(self) -> None:
+        artifact = self.root / "artifacts"
+        project = self.root / "project"
+        shutil.copytree(self.root, artifact, ignore=shutil.ignore_patterns("artifacts", "project", ".specify", "WORKFLOW.md"))
+        project.mkdir()
+        (project / "WORKFLOW.md").write_text(WORKFLOW_TEMPLATE.read_text(encoding="utf-8"), encoding="utf-8")
+        state = json.loads((artifact / "state.json").read_text())
+        state["workflow"]["path"] = "WORKFLOW.md"
+        state["workflow"]["sha256"] = sha256(project / "WORKFLOW.md")
+        (artifact / "state.json").write_text(json.dumps(state))
+        result = subprocess.run([sys.executable, str(AUDITOR), str(artifact), "--project-root", str(project), "--json"], text=True, capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(json.loads(result.stdout)["verdict"], "GO")
+
+    def test_v2_governance_hash_and_utf8_are_fail_closed(self) -> None:
+        artifact = self.root / "artifacts"
+        project = self.root / "project"
+        shutil.copytree(self.root, artifact, ignore=shutil.ignore_patterns("artifacts", "project"))
+        project.mkdir()
+        workflow = project / "WORKFLOW.md"
+        workflow.write_text(WORKFLOW_TEMPLATE.read_text(encoding="utf-8"), encoding="utf-8")
+        state = json.loads((artifact / "state.json").read_text())
+        state["workflow"]["path"] = "WORKFLOW.md"
+        state["workflow"]["sha256"] = "0" * 64
+        (artifact / "state.json").write_text(json.dumps(state))
+        result = subprocess.run([sys.executable, str(AUDITOR), str(artifact), "--project-root", str(project), "--json"], text=True, capture_output=True)
+        self.assertEqual(result.returncode, 1)
+        self.assertEqual(json.loads(result.stdout)["verdict"], "NO-GO")
+        (artifact / "CONTEXT.md").write_bytes(b"\xff")
+        result = subprocess.run([sys.executable, str(AUDITOR), str(artifact), "--project-root", str(project), "--json"], text=True, capture_output=True)
+        self.assertEqual(result.returncode, 1)
+        self.assertEqual(json.loads(result.stdout)["code"], "INVALID-UTF8")
+        self.assertNotIn("Traceback", result.stderr)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
