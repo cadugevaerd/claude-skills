@@ -1,83 +1,125 @@
-# Protocolo de sessão
+# Protocolo de sessão v2
 
-Este documento torna executáveis os gates de `iniciar|retomar|auditar` e a parada plan-only. Frases com **deve**, **nunca** e **somente** são normativas.
+Frases com **deve**, **nunca** e **somente** são normativas.
 
-## Checklist de preflight
+## Fluxo
 
-### `iniciar|retomar`
+```text
+worktree/branch dedicada
+        │
+        ▼
+grill_workspace init ──> .grill/work-items/<work-id>/
+        │
+        ▼
+entrevista → audit → PLAN_ONLY_STOP
+        │
+        ▼
+ship externo → state complete/GO → reconcile preview → apply na integração
+```
 
-- [ ] Resolver e fixar o Git root.
-- [ ] Executar `python3 "${PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/skills/grill-with-docs/scripts/ensure_workflow.py" --ensure ROOT` (ou path equivalente da skill).
-- [ ] Exigir JSON com resultado exatamente `CREATED` ou `REUSED`.
-- [ ] Reler `WORKFLOW.md` e gravar seu path canônico e hash no `state.json` antes da primeira pergunta.
-- [ ] Confirmar Spec Kit initialized e `.specify/templates/constitution-template.md` local.
-- [ ] Confirmar as oito entradas exatas: constitution, WORKFLOW, CONTEXT, docs/adr, ROADMAP, DECISION-BACKLOG, PLAN-CONTEXT e handoff selecionado.
-- [ ] Manter auxiliares separados: FRONTIER, ROUND-LOG, state e AUDIT.
-- [ ] Validar paths canônicos, sem traversal, e materialização incremental/idempotente.
-- [ ] Preservar artefatos existentes; não inventar princípios nem usar bundle de constitution.
+## Preflight `iniciar|retomar`
 
-Qualquer falha acima é `BLOCKED`. Constituição ausente é `not-present` e não bloqueia; se presente, é imutável, validada em UTF-8, hashada e cada cláusula normativa exige evidência e justificativa. Nenhum ADR pode enfraquecer requisito `NON-NEGOTIABLE`.
+- [ ] Resolver e fixar o Git root real.
+- [ ] Confirmar branch/worktree dedicada para a feature, fix ou hotfix.
+- [ ] Executar `ensure_workflow.py --ensure ROOT`; aceitar somente `CREATED|REUSED`.
+- [ ] Executar `grill_workspace.py init ROOT --type ... --slug ...`.
+- [ ] Fixar o `work_id` retornado e usar somente `.grill/work-items/<work-id>/`.
+- [ ] Confirmar `WORK-ITEM.json`, metadata imutável e hash canônico.
+- [ ] Reler `WORKFLOW.md` project-wide e seu hash.
+- [ ] Tratar a Constituição como `not-present` se ausente.
+- [ ] Se presente, validar UTF-8, placeholders, hash e cobertura exata em `CONSTITUTION-CHECK.md`.
+- [ ] Nunca criar, emendar, dispensar ou enfraquecer a Constituição.
+- [ ] Validar paths sem traversal/symlink e preservar conteúdo humano.
+- [ ] Confirmar que `.grill/global/` não foi alterado pelo init.
 
-O bootstrap automatizado cria somente `WORKFLOW.md`. A skill cria ou atualiza os outros sete artefatos de modo incremental a partir dos templates, depois das aprovações aplicáveis e sem fabricar conteúdo decisório.
+Falha de identidade, integridade, path, lock ou materialização é `BLOCKED`. Falha constitucional é `BLOCKED-CONSTITUTION`. A ausência da Constituição, isoladamente, não bloqueia.
 
-### `auditar`
+## Entradas e controle
 
-- [ ] Não chamar `ensure_workflow.py`.
-- [ ] Fazer somente leituras e validações.
-- [ ] Se `WORKFLOW.md` faltar, retornar `NO-GO`.
-- [ ] Validar ordem explícita do ROADMAP, não IDs; uma única fase `ready` e `active_phase` coerente.
-- [ ] Confirmar que qualquer BL `open` ligado bloqueia a fase.
-- [ ] Confirmar o handoff WHAT/WHY e a separação HOW em PLAN-CONTEXT/ADRs.
+Project-wide:
+
+- `.specify/memory/constitution.md` — opcional, read-only;
+- `WORKFLOW.md`.
+
+Work-item local:
+
+- `CONTEXT.md`, `docs/adr/`, `ROADMAP.md`, `DECISION-BACKLOG.md`, `PLAN-CONTEXT.md` e handoff selecionado;
+- controles: `WORK-ITEM.json`, `CONSTITUTION-CHECK.md`, `DECISION-FRONTIER.md`, `ROUND-LOG.jsonl`, `state.json`, `AUDIT.md`.
+
+Nunca resolva um path local contra o Git root; resolva contra o diretório do work item.
+
+## Gate constitucional
+
+Para cada heading normativo H2/H3, `CONSTITUTION-CHECK.md` deve conter exatamente uma entrada com:
+
+- `id` e `heading` correspondentes;
+- `status`: somente `PASS|NOT-APPLICABLE` libera;
+- `evidence` não vazia;
+- `justification` não vazia;
+- `constitution_sha256` atual.
+
+`PENDING|UNMAPPED|BLOCKED|VIOLATION`, cobertura ausente/duplicada, hash stale, status desconhecido ou ambiguidade retornam exit `3`. Nenhum ADR funciona como waiver.
 
 ## Loop de entrevista
 
-```text
-INIT → MAP_FRONTIER → ASK_ONE → RECORD → RECOMPUTE_FRONTIER
-                         ↑                    │
-                         └──── decisões ──────┘
-                                              ↓
-                 COMPLETE | BLOCKED | SAFETY_STOP | PAUSED_USER
-```
+1. Classificar cenário e evidências.
+2. Carregar a fronteira completa.
+3. Fazer uma pergunta atômica.
+4. Registrar transição e impact scan.
+5. Atualizar somente o work item atual.
+6. Acrescentar uma linha ao log append-only.
+7. Recalcular a fronteira antes da próxima pergunta.
 
-1. Classifique o cenário e registre fontes oficiais ou `EVIDENCE GAP`.
-2. Carregue a FRONTIER inteira e selecione uma DQ material com dependências satisfeitas.
-3. Faça exatamente uma pergunta atômica.
-4. Registre evidência, resposta e uma transição: `resolved`, `deferred`, `split`, `blocked` ou `out-of-scope`.
-5. Faça impact scan e atualize ADR, BL, CONTEXT, ROADMAP e dependências afetadas.
-6. Acrescente uma linha válida ao ROUND-LOG append-only e recalcule a FRONTIER inteira.
+Duas rodadas sem progresso, terceira repetição, terceira expansão consecutiva ou 25 perguntas materiais: checkpoint + `SAFETY_STOP`. `stop|pausar` grava `PAUSED_USER`.
 
-Sem progresso por duas rodadas, terceira repetição do fingerprint, terceira expansão consecutiva ou 25 perguntas materiais: gravar checkpoint e `SAFETY_STOP`. Uma clarificação por DQ; depois, bloquear ou parar. `stop`/`pausar` grava `PAUSED_USER`. Contradições não são sobrescritas.
+## Auditoria
 
-## Checklist de transição para GO
+- [ ] Executar `grill_workspace.py audit ROOT --work-id ID`.
+- [ ] Não chamar bootstrap nem escrever arquivos.
+- [ ] Validar Constituição antes do auditor decisório.
+- [ ] Confirmar fingerprints idênticos antes/depois.
+- [ ] Validar ordem explícita, fase única pronta, dependências, BLs e handoff WHAT/WHY.
 
-- [ ] A fase é a primeira incompleta na `execution-order` explícita.
-- [ ] `active_phase` aponta para ela.
-- [ ] Há somente uma fase `ready-for-specify`.
-- [ ] Predecessores e dependências estão completos.
-- [ ] Não há backlog `open` ligado à fase.
-- [ ] Handoff exclusivo existe, é WHAT/WHY e tem referências válidas.
-- [ ] PLAN-CONTEXT/ADRs/CONTEXT contêm o HOW para planejamento.
-- [ ] Auditoria passou e a segunda passada não criou DQ média/alta.
+Roots separados são permitidos com `--artifact-root PATH --project-root ROOT`.
 
-O auditor e o core retornam um único JSON. Exit codes: `0` para GO/PREVIEW/APPLIED/CREATED/REUSED, `1` NO-GO, `2` BLOCKED/uso e `3` bloqueio constitucional. `NO-GO`, `BLOCKED`, `SAFETY_STOP` e `PAUSED_USER` nunca liberam handoff.
+Exit codes do core: `0` sucesso/GO/PREVIEW/APPLIED/CREATED/REUSED; `1` NO-GO; `2` BLOCKED/uso; `3` BLOCKED-CONSTITUTION.
 
-## Parada `PLAN_ONLY_STOP`
+## Reconciliação
 
-Após pacote validado, auditoria `GO` e entrega do handoff selecionado:
+Preview:
 
-1. Emitir `PLAN_ONLY_STOP`.
-2. Parar imediatamente.
-3. Não chamar `specify` nem `plan`.
-4. Não editar código, criar branch, commit ou merge.
-5. Informar que agentes externos executarão o workflow.
+- [ ] Ler root atual, `--source-root` e `--source-ref` sem checkout.
+- [ ] Não criar `.grill`, lock ou arquivo global.
+- [ ] Exigir `state.status=complete` e `audit_verdict=GO`.
+- [ ] Detectar IDs divergentes, escopo sobreposto, dependências ausentes/cíclicas, ADRs conflitantes e Constituição stale.
+- [ ] Qualificar IDs como `<work-id>/<ID>`.
 
-Se `specify` for executado fora desta sessão, recebe somente o handoff selecionado. `plan` consome PLAN-CONTEXT, ADRs e CONTEXT.
+Apply:
 
-## Pós-ship em ciclo futuro
+- [ ] Exigir `--integration-branch` igual à branch atual.
+- [ ] Exigir árvore limpa e zero conflitos.
+- [ ] Serializar por lock global.
+- [ ] Gravar somente `.grill/global/ROADMAP.md` e `AUDIT.md`.
+- [ ] Segunda execução deve ser no-op byte-idêntico.
+- [ ] Nunca reescrever work items.
 
-- [ ] Marcar a fase shipped como `complete`.
-- [ ] Tornar a próxima fase `ready` apenas se dependências e BL permitirem.
-- [ ] Registrar decisões, ADRs e novos termos no glossário.
-- [ ] Reauditar antes de selecionar outro handoff.
+## Migração
 
-Hooks `SessionStart`/`SubagentStart` são apenas contexto read-only; trust e configuração pertencem ao Codex `/hooks`.
+- [ ] Preview primeiro e sem escrita.
+- [ ] Mapear arquivos planos, `docs/adr`, `adrs` e `handoffs`.
+- [ ] Validar tudo antes do staging.
+- [ ] Rejeitar symlink inclusive quebrado e UTF-8 inválido.
+- [ ] Aplicar por rename atômico; manter origem intacta.
+- [ ] Target idêntico é `REUSED`; divergente é `BLOCKED`.
+
+## `PLAN_ONLY_STOP`
+
+Após pacote válido, auditoria `GO` e handoff entregue:
+
+1. emitir `PLAN_ONLY_STOP`;
+2. parar imediatamente;
+3. não executar `specify|plan`;
+4. não implementar código nem criar commit/merge;
+5. deixar ship e reconciliação para ciclos externos.
+
+Hooks `SessionStart|SubagentStart` são somente contexto read-only e nunca inicializam work items.

@@ -7,7 +7,7 @@ Coleção de [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) 
 | **`backlog`** | Fonte da verdade GLOBAL de itens diferidos (`~/.backlog/backlog.json`): um backlog único para todos os repositórios, identificado por `repo` + `BL-NNNN`. Registra, tria, promove, resolve, descarta e consolida duplicatas auditáveis com `merge`; gera `consolidado_backlog.md` por clusters de negócio, em linguagem não técnica, com problema e resolução por atividade. |
 | **`code-review-cadu`** | Code review de PR com **veredicto GO/NO-GO por finding** (sobre o merge): NO-GO = merge bloqueado, corrigir nesta PR; GO = merge pode seguir, finding diferível → backlog GLOBAL (`~/.backlog/backlog.json` via skill `/backlog`, após confirmação). Fork do plugin oficial `code-review` da Anthropic (Apache-2.0). |
 | **`code-debug`** | Diagnóstico diagnose-only: recebe comando/log, reproduz, coleta evidências, testa hipóteses e entrega relatório sem executar correções. |
-| **`grill-with-docs`** | Conduz uma pergunta arquitetural por vez: `iniciar|retomar` valida oito entradas Spec Kit; `auditar` é read-only; hooks só injetam contexto e `PLAN_ONLY_STOP` encerra antes de `specify` ou implementação. |
+| **`grill-with-docs`** | Isola um grill por feature/fix/hotfix em `.grill/work-items/<work-id>`, audita a Constituição read-only e reconcilia uma projeção global determinística antes de `PLAN_ONLY_STOP`. |
 | **`grillme-langgraph`** | Entrevista técnica que transforma a descrição de um processo no rascunho de um fluxo **LangGraph** — diagrama do grafo, schema do State (Regra CRUE), tabela de nodes determinístico vs não-determinístico. |
 | **`grillme-gestor`** | Versão não-técnica da `grillme-langgraph`: o gestor descreve o processo em linguagem comum (sem jargão) e recebe **o mesmo** artefato técnico em markdown. |
 | **`rag-kag-decision`** | Decide quando usar RAG, KAG, GraphRAG ou abordagem híbrida conforme documentos, entidades, relações, regras, temporalidade, custo e risco. |
@@ -124,20 +124,28 @@ Reinicie o Claude Code (ou abra uma nova sessão).
 ## Sobre as skills
 
 ### grill-with-docs
-`/grill-with-docs iniciar|retomar` cria ou valida `WORKFLOW.md` e materializa incrementalmente oito entradas Spec Kit:
 
-1. `.specify/memory/constitution.md`;
-2. `WORKFLOW.md`;
-3. `CONTEXT.md`;
-4. `docs/adr/`;
-5. `ROADMAP.md`;
-6. `DECISION-BACKLOG.md`;
-7. `PLAN-CONTEXT.md`;
-8. `handoffs/FASE-NNN-SPECIFY-HANDOFF.md`.
+Cada `feature|fix|hotfix` usa branch/worktree dedicada e um namespace próprio:
 
-O bootstrap automatizado cria somente `WORKFLOW.md`; a skill materializa os outros sete artefatos a partir dos templates, após as aprovações aplicáveis e conforme a entrevista produz evidência. Ele nunca fabrica uma constitution ou decisão.
+```text
+.grill/work-items/<work-id>/
+├── WORK-ITEM.json
+├── CONTEXT.md
+├── docs/adr/
+├── ROADMAP.md
+├── DECISION-BACKLOG.md
+├── DECISION-FRONTIER.md
+├── PLAN-CONTEXT.md
+├── ROUND-LOG.jsonl
+├── state.json
+├── CONSTITUTION-CHECK.md
+├── AUDIT.md
+└── handoffs/
+```
 
-`DECISION-FRONTIER.md`, `ROUND-LOG.jsonl`, `state.json` e `AUDIT.md` são auxiliares auditáveis. `/grill-with-docs auditar` é read-only. Hooks `SessionStart`/`SubagentStart` apenas injetam contexto. Repetição, ausência de progresso, expansão de escopo ou budget acionam `SAFETY_STOP` retomável. A skill termina em `PLAN_ONLY_STOP` sem chamar `specify`, implementar código ou criar branch, commit ou merge; o executor posterior entrega somente o handoff selecionado ao `specify`. Não há alias nem merge automático.
+`WORKFLOW.md` e `.specify/memory/constitution.md` permanecem project-wide. A Constituição é opcional; quando presente, é read-only, hashada e mapeada por cláusula com evidência e justificativa. Nenhum ADR pode dispensá-la ou enfraquecê-la.
+
+`grill_workspace.py` fornece `init`, `audit`, `reconcile` e `migrate`. O preview de reconciliação é read-only; `--apply` exige branch de integração limpa e gera somente `.grill/global/ROADMAP.md` e `AUDIT.md`. IDs locais são qualificados como `<work-id>/<ID>`. Hooks continuam read-only. A entrevista termina em `PLAN_ONLY_STOP`, sem executar `specify|plan`, implementar código ou fazer merge.
 
 ### backlog
 
