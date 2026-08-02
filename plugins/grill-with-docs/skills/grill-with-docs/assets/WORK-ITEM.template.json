@@ -1,0 +1,12 @@
+{
+  "schema": "grill-work-item/v2",
+  "work_id": "{{WORK_ID}}",
+  "type": "{{TYPE}}",
+  "slug": "{{SLUG}}",
+  "branch": "{{BRANCH}}",
+  "HEAD": "{{HEAD}}",
+  "base-ref": "{{BASE_REF}}",
+  "base-commit": "{{BASE_COMMIT}}",
+  "constitution": {"state":"{{CONSTITUTION_STATE}}","path":null,"sha256":null},
+  "workflow": {"path":"WORKFLOW.md","sha256":null}
+}

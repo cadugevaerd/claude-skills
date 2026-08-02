@@ -16,7 +16,7 @@ Este documento torna executáveis os gates de `iniciar|retomar|auditar` e a para
 - [ ] Validar paths canônicos, sem traversal, e materialização incremental/idempotente.
 - [ ] Preservar artefatos existentes; não inventar princípios nem usar bundle de constitution.
 
-Qualquer falha acima é `BLOCKED`. A constitution somente pode ser criada/emendada após aprovação, com SemVer, datas e governance; enfraquecimento `NON-NEGOTIABLE` exige ADR.
+Qualquer falha acima é `BLOCKED`. Constituição ausente é `not-present` e não bloqueia; se presente, é imutável, validada em UTF-8, hashada e cada cláusula normativa exige evidência e justificativa. Nenhum ADR pode enfraquecer requisito `NON-NEGOTIABLE`.
 
 O bootstrap automatizado cria somente `WORKFLOW.md`. A skill cria ou atualiza os outros sete artefatos de modo incremental a partir dos templates, depois das aprovações aplicáveis e sem fabricar conteúdo decisório.
 
@@ -59,7 +59,7 @@ Sem progresso por duas rodadas, terceira repetição do fingerprint, terceira ex
 - [ ] PLAN-CONTEXT/ADRs/CONTEXT contêm o HOW para planejamento.
 - [ ] Auditoria passou e a segunda passada não criou DQ média/alta.
 
-O auditor retorna `0 GO`, `1 NO-GO` ou `2 BLOCKED`. `GO` imprime a fase e o handoff selecionados. `NO-GO`, `BLOCKED`, `SAFETY_STOP` e `PAUSED_USER` nunca liberam handoff.
+O auditor e o core retornam um único JSON. Exit codes: `0` para GO/PREVIEW/APPLIED/CREATED/REUSED, `1` NO-GO, `2` BLOCKED/uso e `3` bloqueio constitucional. `NO-GO`, `BLOCKED`, `SAFETY_STOP` e `PAUSED_USER` nunca liberam handoff.
 
 ## Parada `PLAN_ONLY_STOP`
 
