@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import concurrent.futures
+import importlib.util
 import json
 import os
 import re
@@ -20,6 +21,16 @@ SCRIPT = PLUGIN / "skills/grill-with-docs/scripts/grill_workspace.py"
 WORKFLOW_TEMPLATE = PLUGIN / "skills/grill-with-docs/assets/WORKFLOW.template.md"
 CHECK_START = "<!-- grill-constitution-check:start -->"
 CHECK_END = "<!-- grill-constitution-check:end -->"
+
+
+def load_workspace_module():
+    name = "grill_workspace_contract_module"
+    spec = importlib.util.spec_from_file_location(name, SCRIPT)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module
+    spec.loader.exec_module(module)
+    return module
 
 
 def invoke(*args: object) -> tuple[subprocess.CompletedProcess[str], dict]:
@@ -403,6 +414,24 @@ class WorkspaceV2Contract(unittest.TestCase):
         self.assertEqual(verdicts.count("APPLIED"), 1)
         self.assertEqual(verdicts.count("REUSED"), 3)
         self.assertFalse(lock.exists())
+
+    def test_unavailable_process_identity_never_marks_live_lock_stale(self) -> None:
+        module = load_workspace_module()
+        lock = self.root / "identity.lock"
+        lock.mkdir()
+        (lock / "owner.json").write_text(
+            json.dumps({"pid": os.getpid(), "host": socket.gethostname(), "process_start": "linux:recorded"}),
+            encoding="utf-8",
+        )
+        original = getattr(module, "process_start_observation")
+        try:
+            setattr(module, "process_start_observation", lambda _pid: ("unavailable", None))
+            self.assertFalse(module.stale_local_lock(lock))
+            setattr(module, "process_start_observation", lambda _pid: ("found", "linux:reused"))
+            self.assertTrue(module.stale_local_lock(lock))
+        finally:
+            setattr(module, "process_start_observation", original)
+            sys.modules.pop("grill_workspace_contract_module", None)
 
     def test_migrate_preview_apply_preserves_files_directories_and_reuses(self) -> None:
         originals = {

@@ -438,15 +438,25 @@ def validate_metadata(metadata: dict[str, Any], expected_work_id: str | None = N
     return immutable
 
 
-def process_start_token(pid: int) -> str | None:
-    """Return Linux's kernel process start tick to disambiguate PID reuse."""
+def process_start_observation(pid: int) -> tuple[str, str | None]:
+    """Observe Linux process identity without treating read errors as death."""
     if not sys.platform.startswith("linux"):
-        return None
+        return "unsupported", None
+    path = Path("/proc") / str(pid) / "stat"
     try:
-        fields = (Path("/proc") / str(pid) / "stat").read_text(encoding="utf-8").rsplit(")", 1)[1].split()
+        fields = path.read_text(encoding="utf-8").rsplit(")", 1)[1].split()
+    except FileNotFoundError:
+        return "missing", None
     except (OSError, UnicodeError, IndexError):
-        return None
-    return f"linux:{fields[19]}" if len(fields) > 19 else None
+        return "unavailable", None
+    if len(fields) <= 19:
+        return "unavailable", None
+    return "found", f"linux:{fields[19]}"
+
+
+def process_start_token(pid: int) -> str | None:
+    status, token = process_start_observation(pid)
+    return token if status == "found" else None
 
 
 def stale_local_lock(lock: Path) -> bool:
@@ -455,13 +465,15 @@ def stale_local_lock(lock: Path) -> bool:
         pid, host, recorded_start = value.get("pid"), value.get("host"), value.get("process_start")
     except (OSError, UnicodeError, json.JSONDecodeError, AttributeError):
         return False
+    observation, current_start = process_start_observation(pid) if type(pid) is int else ("unavailable", None)
     return bool(
         host == socket.gethostname()
         and type(pid) is int
         and pid > 0
         and isinstance(recorded_start, str)
         and recorded_start.startswith("linux:")
-        and process_start_token(pid) != recorded_start
+        and observation in {"found", "missing"}
+        and current_start != recorded_start
     )
 
 
