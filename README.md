@@ -4,6 +4,7 @@ Coleção de [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) 
 
 | Skill | O que faz |
 |-------|-----------|
+| **`caveman-stable`** | Output Style único e estável para Claude Code: sempre ativo enquanto habilitado, conciso, técnico e preserva exatamente código, comandos e identificadores. |
 | **`backlog`** | Fonte da verdade GLOBAL de itens diferidos (`~/.backlog/backlog.json`): um backlog único para todos os repositórios, identificado por `repo` + `BL-NNNN`. Registra, tria, promove, resolve, descarta e consolida duplicatas auditáveis com `merge`; gera `consolidado_backlog.md` por clusters de negócio, em linguagem não técnica, com problema e resolução por atividade. |
 | **`code-review-cadu`** | Code review de PR com **veredicto GO/NO-GO por finding** (sobre o merge): NO-GO = merge bloqueado, corrigir nesta PR; GO = merge pode seguir, finding diferível → backlog GLOBAL (`~/.backlog/backlog.json` via skill `/backlog`, após confirmação). Fork do plugin oficial `code-review` da Anthropic (Apache-2.0). |
 | **`code-debug`** | Diagnóstico diagnose-only: recebe comando/log, reproduz, coleta evidências, testa hipóteses e entrega relatório sem executar correções. |
@@ -31,6 +32,7 @@ claude plugin marketplace add cadugevaerd/claude-skills
 
 # 2. instalar só o que você quer
 claude plugin install backlog@claude-skills
+claude plugin install caveman-stable@claude-skills
 claude plugin install code-review-cadu@claude-skills
 claude plugin install code-debug@claude-skills
 claude plugin install grill-with-docs@claude-skills
@@ -96,10 +98,14 @@ cp -r claude-skills/plugins/backlog/skills/backlog ~/.claude/skills/
 
 Reinicie o Claude Code (ou abra uma nova sessão).
 
+`caveman-stable` não é compatível com a instalação manual acima porque depende do Output Style distribuído pelo plugin. Instale-o pelo marketplace.
+
 ## Uso
 
 ```
 /backlog               # registrar/triar/promover itens diferidos (faz bootstrap se preciso)
+/reload-plugins        # recarregar após install/enable/disable/update/uninstall
+/clear                 # reconstruir a conversa após recarregar mudança de Output Style
 /backlog format        # reorganizar um repo: re-triar severidade + atribuir rank 1–100
 /backlog consolidado repo=all # preview e gera ./consolidado_backlog.md por cluster e criticidade após confirmação
 /backlog merge repo=all # propor merge de duplicatas por repo; pede confirmação antes de gravar
@@ -122,6 +128,10 @@ Reinicie o Claude Code (ou abra uma nova sessão).
 ```
 
 ## Sobre as skills
+
+### caveman-stable
+
+Output Style único, sempre ativo enquanto o plugin estiver habilitado. Remove filler, pleasantries, hedging desnecessário, repetição e narração rotineira, preservando qualificadores reais de incerteza, probabilidade e limitação; preserva exatamente código, comandos, paths, URLs, identificadores, APIs e erros. Usa prosa explícita para segurança, ações destrutivas, ambiguidade e passos ordenados. Não altera escopo, ferramentas, permissões ou verificação. Após instalar, habilitar, desabilitar, atualizar ou desinstalar, execute `/reload-plugins`; depois use `/clear` ou uma nova sessão para reconstruir o chat. Pode conflitar com outro `force-for-plugin: true`; mantenha apenas um forced Output Style. A aplicação à conversa principal e a subagents depende do suporte da versão do Claude Code.
 
 ### grill-with-docs
 

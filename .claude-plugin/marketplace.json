@@ -2,12 +2,21 @@
   "$schema": "https://api.claude.ai/schemas/marketplace-v1.json",
   "name": "claude-skills",
   "version": "1.0.0",
-  "description": "Marketplace de Agent Skills para Claude Code — backlog, code-review-cadu, code-debug, relatorio-gerencial, grill-with-docs, grillme-langgraph, grillme-gestor, rag-kag-decision, modelos-custo-beneficio, facilitador-reunioes, langsmith-evals, prompt-only-agent, qa-planner e whatsapp-business-platform",
+  "description": "Marketplace de Agent Skills para Claude Code — inclui caveman-stable, backlog, code-review-cadu, code-debug, relatorio-gerencial, grill-with-docs, grillme-langgraph, grillme-gestor, rag-kag-decision, modelos-custo-benefício, facilitador-reunioes, langsmith-evals, prompt-only-agent, qa-planner e whatsapp-business-platform",
   "owner": {
     "name": "Carlos Araujo",
     "email": "cadu.gevaerd@gmail.com"
   },
   "plugins": [
+    {
+      "name": "caveman-stable",
+      "description": "Estilo de saída estável, técnico e conciso para Claude Code; sempre ativo enquanto habilitado.",
+      "source": "./plugins/caveman-stable",
+      "version": "1.0.0",
+      "author": {"name": "Carlos Araujo"},
+      "category": "development",
+      "tags": ["output-style", "concise", "technical", "stable"]
+    },
     {
       "name": "grill-with-docs",
       "description": "Isola um grill por feature/fix/hotfix em .grill/work-items, aplica gate constitucional read-only e encerra em PLAN_ONLY_STOP; após ship externo e fase complete/GO, permite reconciliar o ROADMAP global determinístico.",
