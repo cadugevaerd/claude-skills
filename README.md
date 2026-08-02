@@ -7,7 +7,7 @@ Coleção de [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) 
 | **`backlog`** | Fonte da verdade GLOBAL de itens diferidos (`~/.backlog/backlog.json`): um backlog único para todos os repositórios, identificado por `repo` + `BL-NNNN`. Registra, tria, promove, resolve, descarta e consolida duplicatas auditáveis com `merge`; gera `consolidado_backlog.md` por clusters de negócio, em linguagem não técnica, com problema e resolução por atividade. |
 | **`code-review-cadu`** | Code review de PR com **veredicto GO/NO-GO por finding** (sobre o merge): NO-GO = merge bloqueado, corrigir nesta PR; GO = merge pode seguir, finding diferível → backlog GLOBAL (`~/.backlog/backlog.json` via skill `/backlog`, após confirmação). Fork do plugin oficial `code-review` da Anthropic (Apache-2.0). |
 | **`code-debug`** | Diagnóstico diagnose-only: recebe comando/log, reproduz, coleta evidências, testa hipóteses e entrega relatório sem executar correções. |
-| **`grill-with-docs`** | Isola um grill por feature/fix/hotfix em `.grill/work-items/<work-id>`, audita a Constituição read-only e reconcilia uma projeção global determinística antes de `PLAN_ONLY_STOP`. |
+| **`grill-with-docs`** | Isola um grill por feature/fix/hotfix em `.grill/work-items/<work-id>`, audita a Constituição read-only e encerra em `PLAN_ONLY_STOP`; depois do ship externo, a fase pode ser concluída/ir a `GO` e a projeção global determinística pode ser reconciliada. |
 | **`grillme-langgraph`** | Entrevista técnica que transforma a descrição de um processo no rascunho de um fluxo **LangGraph** — diagrama do grafo, schema do State (Regra CRUE), tabela de nodes determinístico vs não-determinístico. |
 | **`grillme-gestor`** | Versão não-técnica da `grillme-langgraph`: o gestor descreve o processo em linguagem comum (sem jargão) e recebe **o mesmo** artefato técnico em markdown. |
 | **`rag-kag-decision`** | Decide quando usar RAG, KAG, GraphRAG ou abordagem híbrida conforme documentos, entidades, relações, regras, temporalidade, custo e risco. |
@@ -145,7 +145,7 @@ Cada `feature|fix|hotfix` usa branch/worktree dedicada e um namespace próprio:
 
 `WORKFLOW.md` e `.specify/memory/constitution.md` permanecem project-wide. A Constituição é opcional; quando presente, é read-only, hashada e mapeada por cláusula com evidência e justificativa. Nenhum ADR pode dispensá-la ou enfraquecê-la.
 
-`grill_workspace.py` fornece `init`, `audit`, `reconcile` e `migrate`. O preview de reconciliação é read-only; `--apply` exige branch de integração limpa e gera somente `.grill/global/ROADMAP.md` e `AUDIT.md`. IDs locais são qualificados como `<work-id>/<ID>`. Hooks continuam read-only. A entrevista termina em `PLAN_ONLY_STOP`, sem executar `specify|plan`, implementar código ou fazer merge.
+`grill_workspace.py` fornece `init`, `audit`, `reconcile` e `migrate`. A entrevista segue `audit → PLAN_ONLY_STOP`; depois do ship externo, marque a fase como `complete`, reaudite com `GO` e só então use o preview de reconciliação (read-only) ou `--apply`, que exige branch de integração limpa e gera somente `.grill/global/ROADMAP.md` e `AUDIT.md`. IDs locais são qualificados como `<work-id>/<ID>`. Hooks continuam read-only. A entrevista não executa `specify|plan`, implementa código ou faz merge.
 
 ### backlog
 
