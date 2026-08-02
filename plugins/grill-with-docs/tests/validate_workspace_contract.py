@@ -170,6 +170,8 @@ class WorkspaceV2Contract(unittest.TestCase):
         self.assertTrue((second / "handoffs").is_dir())
         self.assertFalse((self.root / ".grill/global").exists())
         self.assertEqual((self.root / "WORKFLOW.md").read_bytes(), WORKFLOW_TEMPLATE.read_bytes())
+        state = json.loads((first / "state.json").read_text(encoding="utf-8"))
+        self.assertEqual(state["workflow"]["version"], "v2")
 
     def test_init_reuse_identity_conflict_and_immutable_tamper(self) -> None:
         item = self._init_item(work_id="stable-id")
@@ -390,7 +392,8 @@ class WorkspaceV2Contract(unittest.TestCase):
         lock = self.root / ".grill/locks/global-reconciliation.lock"
         lock.mkdir(parents=True)
         (lock / "owner.json").write_text(
-            json.dumps({"pid": 999_999_999, "host": socket.gethostname()}), encoding="utf-8"
+            json.dumps({"pid": 999_999_999, "host": socket.gethostname(), "process_start": "linux:0"}),
+            encoding="utf-8",
         )
         command = ("reconcile", self.root, "--apply", "--integration-branch", "main")
         with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
@@ -478,10 +481,17 @@ class WorkspaceV2Contract(unittest.TestCase):
 
     def test_migrate_does_not_replace_generated_state(self) -> None:
         (self.root / "state.json").write_text('{"status":"legacy"}\n', encoding="utf-8")
-        process, _payload = invoke("migrate", self.root, "--type", "fix", "--slug", "state", "--work-id", "state-migration", "--apply")
-        self.assertEqual(process.returncode, 0)
-        state = json.loads((self.root / ".grill/work-items/state-migration/state.json").read_text(encoding="utf-8"))
+        arguments = ("migrate", self.root, "--type", "fix", "--slug", "state", "--work-id", "state-migration", "--apply")
+        process, payload = invoke(*arguments)
+        self.assertEqual((process.returncode, payload["verdict"]), (0, "APPLIED"))
+        target = self.root / ".grill/work-items/state-migration/state.json"
+        state = json.loads(target.read_text(encoding="utf-8"))
         self.assertEqual(state["work_id"], "state-migration")
+        self.assertEqual(state["workflow"]["version"], "v2")
+        generated = target.read_bytes()
+        process, payload = invoke(*arguments)
+        self.assertEqual((process.returncode, payload["verdict"]), (0, "REUSED"))
+        self.assertEqual(target.read_bytes(), generated)
         self.assertIn("constitution", state)
 
     def test_migrate_rejects_broken_file_and_directory_symlinks(self) -> None:

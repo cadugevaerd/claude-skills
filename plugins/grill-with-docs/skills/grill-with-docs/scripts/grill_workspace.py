@@ -378,7 +378,7 @@ def state_template(root: Path, work_id: str, constitution: dict[str, Any], workf
     value = json.loads((ASSETS / "state.template.json").read_text(encoding="utf-8"))
     value["work_id"] = work_id
     value["constitution"] = constitution
-    value["workflow"] = {**workflow, "version": "v1"}
+    value["workflow"] = {**workflow, "version": "v2"}
     return (json.dumps(value, ensure_ascii=False, sort_keys=True, indent=2) + "\n").encode("utf-8")
 
 
@@ -438,6 +438,33 @@ def validate_metadata(metadata: dict[str, Any], expected_work_id: str | None = N
     return immutable
 
 
+def process_start_token(pid: int) -> str | None:
+    """Return Linux's kernel process start tick to disambiguate PID reuse."""
+    if not sys.platform.startswith("linux"):
+        return None
+    try:
+        fields = (Path("/proc") / str(pid) / "stat").read_text(encoding="utf-8").rsplit(")", 1)[1].split()
+    except (OSError, UnicodeError, IndexError):
+        return None
+    return f"linux:{fields[19]}" if len(fields) > 19 else None
+
+
+def stale_local_lock(lock: Path) -> bool:
+    try:
+        value = json.loads((lock / "owner.json").read_text(encoding="utf-8"))
+        pid, host, recorded_start = value.get("pid"), value.get("host"), value.get("process_start")
+    except (OSError, UnicodeError, json.JSONDecodeError, AttributeError):
+        return False
+    return bool(
+        host == socket.gethostname()
+        and type(pid) is int
+        and pid > 0
+        and isinstance(recorded_start, str)
+        and recorded_start.startswith("linux:")
+        and process_start_token(pid) != recorded_start
+    )
+
+
 def acquire_lock(
     root: Path,
     work_id: str,
@@ -452,9 +479,11 @@ def acquire_lock(
     while True:
         try:
             lock.mkdir()
-            (lock / "owner.json").write_text(
-                json.dumps({"pid": os.getpid(), "host": socket.gethostname()}, sort_keys=True), encoding="utf-8"
-            )
+            owner = {"pid": os.getpid(), "host": socket.gethostname()}
+            start_token = process_start_token(os.getpid())
+            if start_token is not None:
+                owner["process_start"] = start_token
+            (lock / "owner.json").write_text(json.dumps(owner, sort_keys=True), encoding="utf-8")
             return lock
         except FileExistsError:
             # Work-item directories are published by one atomic rename. Once the
@@ -462,24 +491,25 @@ def acquire_lock(
             # waiting for the creator to remove its diagnostic lock directory.
             if reuse_if_target_exists and target.is_dir() and not target.is_symlink():
                 return None
-            owner = lock / "owner.json"
+            recovery = locks / f".{work_id}.recovery"
+            recovered = False
             try:
-                value = json.loads(owner.read_text(encoding="utf-8"))
-                pid, host = value.get("pid"), value.get("host")
-            except (OSError, UnicodeError, json.JSONDecodeError, AttributeError):
-                pid = host = None
-            if host == socket.gethostname() and type(pid) is int and pid > 0:
+                recovery.mkdir()
+            except FileExistsError:
+                pass
+            else:
                 try:
-                    os.kill(pid, 0)
-                except ProcessLookupError:
-                    try:
+                    # Re-read the owner while holding the recovery mutex. This
+                    # prevents an old waiter from deleting a newly acquired lock.
+                    if stale_local_lock(lock):
                         shutil.rmtree(lock, ignore_errors=False)
-                    except FileNotFoundError:
-                        # Another waiter recovered the same orphan first.
-                        pass
-                    continue
-                except PermissionError:
-                    pass
+                        recovered = True
+                except FileNotFoundError:
+                    recovered = True
+                finally:
+                    shutil.rmtree(recovery, ignore_errors=True)
+            if recovered:
+                continue
             if time.monotonic() >= deadline:
                 raise CliFailure(EXIT_BLOCKED, "BLOCKED", "LOCK-CONTENTION", work_id)
             time.sleep(0.03)
@@ -636,7 +666,7 @@ def audit_command(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
     after = read_external_bundle(item) if args.artifact_root else read_local_bundle(root, item)
     if before.fingerprint != after.fingerprint:
         return {"verdict": "NO-GO", "code": "AUDITOR-MUTATED-WORK-ITEM"}, EXIT_NO_GO
-    exit_code = process.returncode if process.returncode in {0, 1, 2} else EXIT_NO_GO
+    exit_code = process.returncode if process.returncode in {0, 1, 2, 3} else EXIT_NO_GO
     payload = {
         "verdict": receipt.get("verdict", "NO-GO"),
         "code": receipt.get("code", "OK" if exit_code == 0 else "AUDIT-FAILED"),
@@ -983,6 +1013,8 @@ def migrate_command(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
             if migration.get("source_hashes") != hashes:
                 return {**preview, "verdict": "BLOCKED", "code": "TARGET-DIVERGES", "work_id": work_id}, EXIT_BLOCKED
             for path, data in mapped.items():
+                if path == "state.json":
+                    continue
                 if bundle.files.get(path) != data:
                     return {**preview, "verdict": "BLOCKED", "code": "TARGET-DIVERGES", "work_id": work_id}, EXIT_BLOCKED
             return {**preview, "verdict": "REUSED", "work_id": work_id}, EXIT_OK
