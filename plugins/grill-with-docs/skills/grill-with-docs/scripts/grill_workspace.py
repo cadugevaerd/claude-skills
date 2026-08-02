@@ -414,7 +414,14 @@ def validate_metadata(metadata: dict[str, Any], expected_work_id: str | None = N
     return immutable
 
 
-def acquire_lock(root: Path, work_id: str, target: Path, timeout: float = 3.0) -> Path:
+def acquire_lock(
+    root: Path,
+    work_id: str,
+    target: Path,
+    timeout: float = 15.0,
+    *,
+    reuse_if_target_exists: bool = False,
+) -> Path | None:
     locks = ensure_directory(root, ".grill/locks")
     lock = locks / f"{work_id}.lock"
     deadline = time.monotonic() + timeout
@@ -426,8 +433,11 @@ def acquire_lock(root: Path, work_id: str, target: Path, timeout: float = 3.0) -
             )
             return lock
         except FileExistsError:
-            if target.is_dir() and not lock.exists():
-                continue
+            # Work-item directories are published by one atomic rename. Once the
+            # target is visible, readers can safely validate/reuse it without
+            # waiting for the creator to remove its diagnostic lock directory.
+            if reuse_if_target_exists and target.is_dir() and not target.is_symlink():
+                return None
             if time.monotonic() >= deadline:
                 raise CliFailure(EXIT_BLOCKED, "BLOCKED", "LOCK-CONTENTION", work_id)
             time.sleep(0.03)
@@ -530,7 +540,7 @@ def init_command(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
     if not WORK_ID_RE.fullmatch(work_id):
         raise CliFailure(EXIT_BLOCKED, "BLOCKED", "INVALID-WORK-ID", work_id)
     target = root / ".grill" / "work-items" / work_id
-    lock = acquire_lock(root, work_id, target)
+    lock = acquire_lock(root, work_id, target, reuse_if_target_exists=True)
     try:
         if target.exists():
             bundle = read_local_bundle(root, target)
@@ -551,7 +561,8 @@ def init_command(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
         bundle = read_local_bundle(root, target)
         return {"status": "CREATED", "work_id": work_id, "path": str(target), "fingerprint": bundle.fingerprint}, EXIT_OK
     finally:
-        shutil.rmtree(lock, ignore_errors=True)
+        if lock is not None:
+            shutil.rmtree(lock, ignore_errors=True)
 
 
 def audit_command(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
@@ -840,7 +851,8 @@ def reconcile_command(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
         replace_global_directory(root, roadmap, audit)
         return {**preview, "verdict": "APPLIED", "code": "OK"}, EXIT_OK
     finally:
-        shutil.rmtree(lock, ignore_errors=True)
+        if lock is not None:
+            shutil.rmtree(lock, ignore_errors=True)
 
 
 def collect_legacy(root: Path) -> tuple[dict[str, bytes], dict[str, str]]:
@@ -899,7 +911,7 @@ def migrate_command(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
     if not WORK_ID_RE.fullmatch(work_id):
         raise CliFailure(EXIT_BLOCKED, "BLOCKED", "INVALID-WORK-ID", work_id)
     target = root / ".grill" / "work-items" / work_id
-    lock = acquire_lock(root, work_id, target)
+    lock = acquire_lock(root, work_id, target, reuse_if_target_exists=True)
     try:
         if target.exists():
             bundle = read_local_bundle(root, target)
@@ -925,7 +937,8 @@ def migrate_command(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
             raise
         return {**preview, "verdict": "APPLIED", "work_id": work_id}, EXIT_OK
     finally:
-        shutil.rmtree(lock, ignore_errors=True)
+        if lock is not None:
+            shutil.rmtree(lock, ignore_errors=True)
 
 
 def build_parser() -> JsonParser:
