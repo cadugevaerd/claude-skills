@@ -10,7 +10,7 @@
   "plugins": [
     {
       "name": "grill-with-docs",
-      "description": "Isola um grill por feature/fix/hotfix em .grill/work-items, aplica gate constitucional read-only e reconcilia ROADMAP global determinístico antes de PLAN_ONLY_STOP.",
+      "description": "Isola um grill por feature/fix/hotfix em .grill/work-items, aplica gate constitucional read-only e encerra em PLAN_ONLY_STOP; após ship externo e fase complete/GO, permite reconciliar o ROADMAP global determinístico.",
       "source": "./plugins/grill-with-docs",
       "version": "2.0.0",
       "author": {"name": "Carlos Araujo"},
