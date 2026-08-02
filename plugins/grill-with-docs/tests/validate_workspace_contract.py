@@ -429,6 +429,43 @@ class WorkspaceV2Contract(unittest.TestCase):
         self.assertEqual(process.returncode, 2)
         self.assertFalse((linked / ".grill/work-items/link-migration").exists())
 
+    def test_core_validation_rejects_invalid_metadata_migration_and_adr_reference(self) -> None:
+        item = self._init_item(work_id="validation")
+        metadata = self._metadata(item)
+        metadata["immutable"]["type"] = "task"
+        metadata["immutable_sha256"] = "bad"
+        self._write_metadata(item, metadata)
+        process, payload = invoke("reconcile", self.root)
+        self.assertEqual(process.returncode, 2)
+        self.assertIn(payload["code"], {"IMMUTABLE-TAMPERED", "METADATA-SCHEMA"})
+
+        other = self._new_repo()
+        (other / "CONTEXT.md").write_text("legacy\n", encoding="utf-8")
+        process, _payload = invoke("migrate", other, "--type", "feature", "--slug", "legacy", "--work-id", "migration", "--apply")
+        self.assertEqual(process.returncode, 0)
+        migrated = other / ".grill/work-items/migration/WORK-ITEM.json"
+        value = json.loads(migrated.read_text(encoding="utf-8"))
+        value["migration"]["source_hashes"]["CONTEXT.md"] = "not-a-sha256"
+        migrated.write_text(json.dumps(value), encoding="utf-8")
+        process, payload = invoke("reconcile", other)
+        self.assertEqual((process.returncode, payload["code"]), (2, "MIGRATION-SCHEMA"))
+
+    def test_constitution_repeated_headings_get_unique_ids(self) -> None:
+        constitution = self._constitution()
+        constitution.write_text("# C\n## Rules\na\n## Rules\nb\n## Rules\nc\n", encoding="utf-8")
+        process, payload = invoke("init", self.root, "--type", "feature", "--slug", "repeat", "--work-id", "repeat")
+        self.assertEqual(process.returncode, 0, payload)
+        check = self._read_check(self.root / ".grill/work-items/repeat")
+        self.assertEqual([entry["id"] for entry in check["clauses"]], ["rules", "rules-2", "rules-3"])
+
+    def test_migrate_does_not_replace_generated_state(self) -> None:
+        (self.root / "state.json").write_text('{"status":"legacy"}\n', encoding="utf-8")
+        process, _payload = invoke("migrate", self.root, "--type", "fix", "--slug", "state", "--work-id", "state-migration", "--apply")
+        self.assertEqual(process.returncode, 0)
+        state = json.loads((self.root / ".grill/work-items/state-migration/state.json").read_text(encoding="utf-8"))
+        self.assertEqual(state["work_id"], "state-migration")
+        self.assertIn("constitution", state)
+
     def test_migrate_rejects_broken_file_and_directory_symlinks(self) -> None:
         broken_file = self._new_repo()
         (broken_file / "CONTEXT.md").symlink_to(broken_file / "does-not-exist")

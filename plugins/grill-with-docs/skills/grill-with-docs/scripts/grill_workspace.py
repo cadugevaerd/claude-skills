@@ -216,8 +216,10 @@ def constitution_clauses(text: str) -> list[dict[str, str]]:
             continue
         slug = re.sub(r"[^a-z0-9]+", "-", normalized.casefold()).strip("-") or "clause"
         clause_id = slug
-        if clause_id in seen:
-            clause_id = f"{slug}-{hashlib.sha256(normalized.encode()).hexdigest()[:8]}"
+        suffix = 2
+        while clause_id in seen:
+            clause_id = f"{slug}-{suffix}"
+            suffix += 1
         seen.add(clause_id)
         clauses.append({"id": clause_id, "heading": normalized})
     if not clauses:
@@ -407,10 +409,31 @@ def validate_metadata(metadata: dict[str, Any], expected_work_id: str | None = N
     immutable = metadata.get("immutable")
     if not isinstance(immutable, dict) or metadata.get("immutable_sha256") != hash_bytes(canonical(immutable)):
         raise CliFailure(EXIT_BLOCKED, "BLOCKED", "IMMUTABLE-TAMPERED", expected_work_id or "unknown")
-    if immutable.get("schema") != "grill-work-item/v2" or not isinstance(immutable.get("work_id"), str):
+    if (
+        immutable.get("schema") != "grill-work-item/v2"
+        or not isinstance(immutable.get("work_id"), str)
+        or immutable.get("type") not in KINDS
+        or not isinstance(immutable.get("slug"), str)
+        or not SLUG_RE.fullmatch(immutable["slug"])
+        or not WORK_ID_RE.fullmatch(immutable["work_id"])
+    ):
         raise CliFailure(EXIT_BLOCKED, "BLOCKED", "METADATA-SCHEMA", expected_work_id or "unknown")
     if expected_work_id is not None and immutable["work_id"] != expected_work_id:
         raise CliFailure(EXIT_BLOCKED, "BLOCKED", "WORK-ID-DIVERGENCE", expected_work_id)
+    migration = metadata.get("migration")
+    if migration is not None:
+        if not isinstance(migration, dict):
+            raise CliFailure(EXIT_BLOCKED, "BLOCKED", "MIGRATION-SCHEMA", immutable["work_id"])
+        source_hashes = migration.get("source_hashes")
+        source_paths = migration.get("source_paths")
+        if (
+            not isinstance(source_hashes, dict)
+            or not isinstance(source_paths, dict)
+            or set(source_hashes) != set(source_paths)
+            or not all(isinstance(key, str) and isinstance(value, str) and re.fullmatch(r"[0-9a-f]{64}", value) for key, value in source_hashes.items())
+            or not all(isinstance(key, str) and isinstance(value, str) and value for key, value in source_paths.items())
+        ):
+            raise CliFailure(EXIT_BLOCKED, "BLOCKED", "MIGRATION-SCHEMA", immutable["work_id"])
     return immutable
 
 
@@ -438,6 +461,20 @@ def acquire_lock(
             # waiting for the creator to remove its diagnostic lock directory.
             if reuse_if_target_exists and target.is_dir() and not target.is_symlink():
                 return None
+            owner = lock / "owner.json"
+            try:
+                value = json.loads(owner.read_text(encoding="utf-8"))
+                pid, host = value.get("pid"), value.get("host")
+            except (OSError, UnicodeError, json.JSONDecodeError, AttributeError):
+                pid = host = None
+            if host == socket.gethostname() and isinstance(pid, int) and pid > 0:
+                try:
+                    os.kill(pid, 0)
+                except ProcessLookupError:
+                    shutil.rmtree(lock, ignore_errors=False)
+                    continue
+                except PermissionError:
+                    pass
             if time.monotonic() >= deadline:
                 raise CliFailure(EXIT_BLOCKED, "BLOCKED", "LOCK-CONTENTION", work_id)
             time.sleep(0.03)
@@ -554,9 +591,14 @@ def init_command(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
         staging = write_bundle_staging(root, work_id, metadata, files)
         try:
             rename_child(target.parent, staging, target)
-        except FileExistsError:
+        except OSError as exc:
+            if exc.errno not in {17, 39}:  # EEXIST / ENOTEMPTY
+                raise
             shutil.rmtree(staging, ignore_errors=True)
             bundle = read_local_bundle(root, target)
+            immutable = validate_metadata(bundle.metadata, work_id)
+            if immutable.get("type") != args.type or immutable.get("slug") != args.slug:
+                raise CliFailure(EXIT_BLOCKED, "BLOCKED", "IDENTITY-DIVERGENCE", work_id)
             return {"status": "REUSED", "work_id": work_id, "path": str(target), "fingerprint": bundle.fingerprint}, EXIT_OK
         bundle = read_local_bundle(root, target)
         return {"status": "CREATED", "work_id": work_id, "path": str(target), "fingerprint": bundle.fingerprint}, EXIT_OK
@@ -654,6 +696,8 @@ def scopes_overlap(left: str, right: str) -> bool:
 def scan_qualified_ids(bundle: ItemBundle) -> set[str]:
     ids: set[str] = set()
     for path, data in bundle.files.items():
+        if path == "WORK-ITEM.json":
+            continue
         name = Path(path).stem
         if ADR_RE.fullmatch(name):
             ids.add(f"{bundle.work_id}/{name}")
@@ -751,7 +795,9 @@ def validate_reconciliation(root: Path, bundles: list[ItemBundle]) -> tuple[dict
             conflicts.append(f"ADR-CONFLICT-SCHEMA:{work_id}")
             continue
         for reference in references:
-            if isinstance(reference, str) and reference in qualified:
+            if not isinstance(reference, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{1,100}/ADR-\d{4}", reference):
+                conflicts.append(f"ADR-CONFLICT-SCHEMA:{work_id}")
+            elif reference in qualified:
                 conflicts.append(f"ADR-CONFLICT:{work_id}->{reference}")
     return unique, sorted(set(conflicts)), sorted(qualified)
 
@@ -773,16 +819,23 @@ def global_documents(items: dict[str, ItemBundle], qualified: list[str], preview
 
 
 def dirty_paths(root: Path) -> set[str]:
-    output = run_git(root, "status", "--porcelain=v1", "--untracked-files=all", "-z")
-    assert isinstance(output, str)
+    output = run_git(root, "status", "--porcelain=v1", "--untracked-files=all", "-z", text=False)
+    assert isinstance(output, bytes)
     paths: set[str] = set()
-    for record in output.split("\0"):
+    records = output.split(b"\0")
+    index = 0
+    while index < len(records):
+        record = records[index]
+        index += 1
         if not record:
             continue
-        value = record[3:]
-        if " -> " in value:
-            value = value.split(" -> ", 1)[1]
+        status = record[:2].decode("ascii", "replace")
+        value = record[3:].decode("utf-8", "surrogateescape")
         paths.add(value)
+        if "R" in status or "C" in status:
+            if index < len(records) and records[index]:
+                paths.add(records[index].decode("utf-8", "surrogateescape"))
+                index += 1
     return paths
 
 
@@ -845,7 +898,10 @@ def reconcile_command(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
                 if disallowed:
                     return {**preview, "verdict": "BLOCKED", "code": "DIRTY-WORKTREE", "dirty": sorted(disallowed)}, EXIT_BLOCKED
                 return {**preview, "verdict": "REUSED", "code": "OK"}, EXIT_OK
-        dirty = {path for path in dirty_paths(root) if not path.startswith(".grill/locks/global-reconciliation.lock/")}
+        dirty = {
+            path for path in dirty_paths(root)
+            if not path.startswith(".grill/locks/global-reconciliation.lock/") and path not in MANAGED_GLOBAL
+        }
         if dirty:
             return {**preview, "verdict": "BLOCKED", "code": "DIRTY-WORKTREE", "dirty": sorted(dirty)}, EXIT_BLOCKED
         replace_global_directory(root, roadmap, audit)
@@ -927,7 +983,7 @@ def migrate_command(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
             return {**preview, "verdict": "REUSED", "work_id": work_id}, EXIT_OK
         immutable = immutable_metadata(root, args, work_id)
         files = initial_files(root, work_id, immutable)
-        files.update(mapped)
+        files.update({path: data for path, data in mapped.items() if path != "state.json"})
         metadata = metadata_document(immutable, files, migration={"source_hashes": hashes, "source_paths": sources})
         staging = write_bundle_staging(root, work_id, metadata, files)
         try:
