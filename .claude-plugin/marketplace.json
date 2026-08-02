@@ -12,7 +12,7 @@
       "name": "grill-with-docs",
       "description": "Isola um grill por feature/fix/hotfix em .grill/work-items, aplica gate constitucional read-only e encerra em PLAN_ONLY_STOP; após ship externo e fase complete/GO, permite reconciliar o ROADMAP global determinístico.",
       "source": "./plugins/grill-with-docs",
-      "version": "2.0.0",
+      "version": "2.0.1",
       "author": {"name": "Carlos Araujo"},
       "category": "development",
       "tags": ["architecture", "adr", "worktree", "constitution", "roadmap", "audit", "reconciliation"]

@@ -7,6 +7,7 @@ import json
 import os
 import re
 import shutil
+import socket
 import subprocess
 import sys
 import tempfile
@@ -288,8 +289,9 @@ class WorkspaceV2Contract(unittest.TestCase):
             handle.write('{"round_id":"R-0042"}\n')
         process, payload = invoke("reconcile", self.root, "--source-root", source)
         self.assertEqual((process.returncode, payload["verdict"]), (0, "PREVIEW"))
-        for qualified in ("source-one/ADR-0042", "source-one/R-0042", "source-one/DQ-0001", "source-one/BL-0001", "source-one/FASE-001"):
+        for qualified in ("source-one/ADR-0042", "source-one/R-0042", "source-one/DQ-0001", "source-one/FASE-001"):
             self.assertIn(qualified, payload["qualified_ids"])
+        self.assertNotIn("source-one/BL-0001", payload["qualified_ids"])
         self.assertNotIn("source-one/source-one", payload["qualified_ids"])
 
     def test_reconcile_source_ref_is_real_repeatable_and_read_only(self) -> None:
@@ -382,6 +384,22 @@ class WorkspaceV2Contract(unittest.TestCase):
         self.assertEqual(verdicts.count("APPLIED"), 1)
         self.assertEqual(verdicts.count("REUSED"), 3)
         self.assertEqual(set(snapshot(self.root / ".grill/global")), {"AUDIT.md", "ROADMAP.md"})
+
+    def test_reconcile_concurrent_waiters_recover_one_orphan_lock(self) -> None:
+        item = self._init_item(); self._mark_complete(item); self._commit_all(self.root)
+        lock = self.root / ".grill/locks/global-reconciliation.lock"
+        lock.mkdir(parents=True)
+        (lock / "owner.json").write_text(
+            json.dumps({"pid": 999_999_999, "host": socket.gethostname()}), encoding="utf-8"
+        )
+        command = ("reconcile", self.root, "--apply", "--integration-branch", "main")
+        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+            results = list(executor.map(lambda _index: invoke(*command), range(4)))
+        self.assertTrue(all(process.returncode == 0 for process, _payload in results))
+        verdicts = [payload["verdict"] for _process, payload in results]
+        self.assertEqual(verdicts.count("APPLIED"), 1)
+        self.assertEqual(verdicts.count("REUSED"), 3)
+        self.assertFalse(lock.exists())
 
     def test_migrate_preview_apply_preserves_files_directories_and_reuses(self) -> None:
         originals = {

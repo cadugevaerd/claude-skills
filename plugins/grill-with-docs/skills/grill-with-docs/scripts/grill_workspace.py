@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import errno
 import hashlib
 import json
 import os
@@ -467,11 +468,15 @@ def acquire_lock(
                 pid, host = value.get("pid"), value.get("host")
             except (OSError, UnicodeError, json.JSONDecodeError, AttributeError):
                 pid = host = None
-            if host == socket.gethostname() and isinstance(pid, int) and pid > 0:
+            if host == socket.gethostname() and type(pid) is int and pid > 0:
                 try:
                     os.kill(pid, 0)
                 except ProcessLookupError:
-                    shutil.rmtree(lock, ignore_errors=False)
+                    try:
+                        shutil.rmtree(lock, ignore_errors=False)
+                    except FileNotFoundError:
+                        # Another waiter recovered the same orphan first.
+                        pass
                     continue
                 except PermissionError:
                     pass
@@ -592,7 +597,7 @@ def init_command(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
         try:
             rename_child(target.parent, staging, target)
         except OSError as exc:
-            if exc.errno not in {17, 39}:  # EEXIST / ENOTEMPTY
+            if exc.errno not in {errno.EEXIST, errno.ENOTEMPTY}:
                 raise
             shutil.rmtree(staging, ignore_errors=True)
             bundle = read_local_bundle(root, target)
