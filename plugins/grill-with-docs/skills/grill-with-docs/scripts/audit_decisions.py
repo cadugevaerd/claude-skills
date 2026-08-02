@@ -127,15 +127,16 @@ def state_path_matches(root: Path, raw: object, expected: Path) -> bool:
         return False
 
 
-def audit(root_arg: Path) -> tuple[list[str], list[str], str | None, Path | None]:
+def audit(root_arg: Path, project_root_arg: Path | None = None) -> tuple[list[str], list[str], str | None, Path | None]:
     root = root_arg.resolve()
+    project_root = (project_root_arg or root_arg).resolve()
     findings: list[str] = []
     blockers: list[str] = []
+    legacy = project_root_arg is None
 
-    # Constitution is optional in v2; absence is not a constitutional block.
-    constitution = managed_path(root, ".specify/memory/constitution.md", "constitution", [])
-    constitution_template = managed_path(root, ".specify/templates/constitution-template.md", "constitution-template", [])
-    workflow = managed_path(root, "WORKFLOW.md", "WORKFLOW", findings)
+    constitution = managed_path(project_root, ".specify/memory/constitution.md", "constitution", findings if legacy else [])
+    constitution_template = managed_path(project_root, ".specify/templates/constitution-template.md", "constitution-template", findings if legacy else [])
+    workflow = managed_path(project_root, "WORKFLOW.md", "WORKFLOW", findings)
     context = managed_path(root, "CONTEXT.md", "CONTEXT", findings)
     adr_dir = managed_path(root, "docs/adr", "docs/adr", findings, kind="dir")
     roadmap = managed_path(root, "ROADMAP.md", "ROADMAP", findings)
@@ -497,7 +498,8 @@ def audit(root_arg: Path) -> tuple[list[str], list[str], str | None, Path | None
             if not isinstance(value, dict):
                 findings.append(f"state: {key} deve ser objeto")
                 continue
-            if expected and expected.is_file() and not state_path_matches(root, value.get("path"), expected):
+            path_root = project_root if key in {"constitution", "workflow"} else root
+            if expected and expected.is_file() and not state_path_matches(path_root, value.get("path"), expected):
                 findings.append(f"state: {key} path divergence")
             if expected and expected.is_file() and value.get("sha256") != sha256(expected):
                 findings.append(f"state: {key} hash divergence")
@@ -528,27 +530,48 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("root", type=Path)
     parser.add_argument("--project-root", type=Path, default=None)
+    parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
-    if not args.root.is_dir():
-        print(json.dumps({"verdict":"BLOCKED","code":"ROOT-MISSING","findings":["diretório inexistente"]}, ensure_ascii=False, sort_keys=True))
+    json_mode = args.json or args.project_root is not None
+    if not args.root.is_dir() or (args.project_root is not None and not args.project_root.is_dir()):
+        if not json_mode:
+            print("BLOCKED\n- diretório inexistente")
+        else:
+            print(json.dumps({"verdict": "BLOCKED", "code": "ROOT-MISSING", "findings": ["diretório inexistente"]}, ensure_ascii=False, sort_keys=True))
         return 2
     root = args.root.resolve()
     try:
-        findings, blockers, selected_phase, selected_handoff = audit(root)
+        findings, blockers, selected_phase, selected_handoff = audit(root, args.project_root)
     except UnicodeError:
-        print(json.dumps({"verdict":"NO-GO","code":"INVALID-UTF8","findings":["invalid UTF-8 input"]}, ensure_ascii=False, sort_keys=True))
+        if not json_mode:
+            print("NO-GO\n- invalid UTF-8 input")
+        else:
+            print(json.dumps({"verdict": "NO-GO", "code": "INVALID-UTF8", "findings": ["invalid UTF-8 input"]}, ensure_ascii=False, sort_keys=True))
         return 1
     except OSError as error:
-        print(json.dumps({"verdict":"NO-GO","code":"FILESYSTEM","findings":[f"filesystem input error: {type(error).__name__}"]}, ensure_ascii=False, sort_keys=True))
+        payload = {"verdict": "NO-GO", "code": "FILESYSTEM", "findings": [f"filesystem input error: {type(error).__name__}"]}
+        if json_mode:
+            print(json.dumps(payload, ensure_ascii=False, sort_keys=True))
+        else:
+            print("NO-GO\n- " + payload["findings"][0])
         return 1
     if findings:
-        print(json.dumps({"verdict":"NO-GO","code":"ARTIFACT-INVALID","findings":findings,"legacy":"NO-GO\n"+"\n".join(f"- {finding}" for finding in findings)}, ensure_ascii=False, sort_keys=True))
+        if json_mode:
+            print(json.dumps({"verdict": "NO-GO", "code": "ARTIFACT-INVALID", "findings": findings}, ensure_ascii=False, sort_keys=True))
+        else:
+            print("NO-GO\n" + "\n".join(f"- {finding}" for finding in findings))
         return 1
     if blockers:
-        print(json.dumps({"verdict":"BLOCKED","code":"EXTERNAL-BLOCKER","findings":blockers,"legacy":"BLOCKED\n"+"\n".join(f"- {blocker}" for blocker in blockers)}, ensure_ascii=False, sort_keys=True))
+        if json_mode:
+            print(json.dumps({"verdict": "BLOCKED", "code": "EXTERNAL-BLOCKER", "findings": blockers}, ensure_ascii=False, sort_keys=True))
+        else:
+            print("BLOCKED\n" + "\n".join(f"- {blocker}" for blocker in blockers))
         return 2
     relative_handoff = selected_handoff.relative_to(root).as_posix() if selected_handoff else ""
-    print(json.dumps({"verdict":"GO","selected_phase":selected_phase,"selected_handoff":relative_handoff,"legacy":f"GO\nselected-phase: {selected_phase}\nselected-handoff: {relative_handoff}"}, ensure_ascii=False, sort_keys=True))
+    if json_mode:
+        print(json.dumps({"verdict": "GO", "selected_phase": selected_phase, "selected_handoff": relative_handoff}, ensure_ascii=False, sort_keys=True))
+    else:
+        print(f"GO\nselected-phase: {selected_phase}\nselected-handoff: {relative_handoff}")
     return 0
 
 
