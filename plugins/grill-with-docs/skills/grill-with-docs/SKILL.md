@@ -3,7 +3,9 @@ name: grill-with-docs
 description: Entrevista decisões arquiteturais uma por vez, converge por fronteira auditável e mantém ROADMAP por fases.
 argument-hint: "iniciar|retomar|pausar|auditar <diretório>"
 ---
-# Grill with Docs
+# Grill with Docs v2
+
+Artefatos de cada feature/fix/hotfix vivem exclusivamente em `.grill/work-items/<work-id>/`. Use `scripts/grill_workspace.py init ROOT --type feature|fix|hotfix --slug SLUG`; auditoria é read-only e a Constituição project-wide é somente leitura. `PLAN_ONLY_STOP` permanece obrigatório antes da implementação. `reconcile` projeta o estado global apenas com `--apply` em branch de integração limpa.
 
 Este é um protocolo de entrevista e preparação **plan-only**. Ele transforma decisões de arquitetura em artefatos rastreáveis e para antes da execução externa.
 
