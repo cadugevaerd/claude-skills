@@ -98,11 +98,14 @@ cp -r claude-skills/plugins/backlog/skills/backlog ~/.claude/skills/
 
 Reinicie o Claude Code (ou abra uma nova sessão).
 
+`caveman-stable` não é compatível com a instalação manual acima porque depende do Output Style distribuído pelo plugin. Instale-o pelo marketplace.
+
 ## Uso
 
 ```
 /backlog               # registrar/triar/promover itens diferidos (faz bootstrap se preciso)
-/clear                 # aplicar mudança de Output Style após enable/disable
+/reload-plugins        # recarregar após install/enable/disable/update/uninstall
+/clear                 # reconstruir a conversa após recarregar mudança de Output Style
 /backlog format        # reorganizar um repo: re-triar severidade + atribuir rank 1–100
 /backlog consolidado repo=all # preview e gera ./consolidado_backlog.md por cluster e criticidade após confirmação
 /backlog merge repo=all # propor merge de duplicatas por repo; pede confirmação antes de gravar
@@ -128,7 +131,7 @@ Reinicie o Claude Code (ou abra uma nova sessão).
 
 ### caveman-stable
 
-Output Style único, sempre ativo enquanto o plugin estiver habilitado. Remove filler, pleasantries, hedging, repetição e narração rotineira; preserva exatamente código, comandos, paths, URLs, identificadores, APIs e erros. Usa prosa explícita para segurança, ações destrutivas, ambiguidade e passos ordenados. Não altera escopo, ferramentas, permissões ou verificação. Após enable/disable, use `/clear` ou uma nova sessão. Pode conflitar com outro `force-for-plugin: true`; mantenha apenas um forced Output Style. A aplicação à conversa principal e a subagents depende do suporte da versão do Claude Code.
+Output Style único, sempre ativo enquanto o plugin estiver habilitado. Remove filler, pleasantries, hedging desnecessário, repetição e narração rotineira, preservando qualificadores reais de incerteza, probabilidade e limitação; preserva exatamente código, comandos, paths, URLs, identificadores, APIs e erros. Usa prosa explícita para segurança, ações destrutivas, ambiguidade e passos ordenados. Não altera escopo, ferramentas, permissões ou verificação. Após instalar, habilitar, desabilitar, atualizar ou desinstalar, execute `/reload-plugins`; depois use `/clear` ou uma nova sessão para reconstruir o chat. Pode conflitar com outro `force-for-plugin: true`; mantenha apenas um forced Output Style. A aplicação à conversa principal e a subagents depende do suporte da versão do Claude Code.
 
 ### grill-with-docs
 
