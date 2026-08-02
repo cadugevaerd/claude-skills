@@ -1,0 +1,8 @@
+{
+  "name": "caveman-stable",
+  "version": "1.0.0",
+  "description": "Estilo de saída estável, técnico e conciso para Claude Code.",
+  "author": {
+    "name": "Carlos Araujo"
+  }
+}
