@@ -28,7 +28,7 @@
       "name": "grill-with-docs",
       "description": "Entrega hotfixes por uma faixa rápida e verificável (HOTFIX-PREPARED → HOTFIX-GO), mantendo planejamento arquitetural em PLAN_ONLY_STOP.",
       "source": "./plugins/grill-with-docs",
-      "version": "2.1.2",
+      "version": "2.1.3",
       "author": {
         "name": "Carlos Araujo"
       },
