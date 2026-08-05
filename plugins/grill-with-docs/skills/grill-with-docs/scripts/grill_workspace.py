@@ -406,6 +406,47 @@ def metadata_document(immutable: dict[str, Any], files: dict[str, bytes], *, mig
     return result
 
 
+def _required_delivery_values(args: argparse.Namespace) -> tuple[list[str], list[str], str, str]:
+    scope = sorted(set(args.scope or []))
+    evidence = [value.strip() for value in (args.evidence or []) if value.strip()]
+    rollback = (args.rollback or "").strip()
+    test_command = (args.test_command or "").strip()
+    if not scope or any(Path(value).is_absolute() or ".." in Path(value).parts for value in scope):
+        raise CliFailure(EXIT_BLOCKED, "BLOCKED", "HOTFIX-SCOPE-CLOSED", "relative scope is required")
+    if not evidence:
+        raise CliFailure(EXIT_NO_GO, "NO-GO", "HOTFIX-EVIDENCE-MISSING", "reproduction/evidence is required")
+    if not test_command:
+        raise CliFailure(EXIT_NO_GO, "NO-GO", "HOTFIX-TEST-MISSING", "correction test command is required")
+    if not rollback:
+        raise CliFailure(EXIT_NO_GO, "NO-GO", "HOTFIX-ROLLBACK-MISSING", "rollback is required")
+    return scope, evidence, test_command, rollback
+
+
+def hotfix_go_command(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
+    """Executable Delivery First lane; never reads ROADMAP/BL/workflow globals."""
+    root = project_root(args.root)
+    if args.mode != "hotfix":
+        raise CliFailure(EXIT_BLOCKED, "BLOCKED", "HOTFIX-MODE-REQUIRED", "only hotfix is executable")
+    scope, evidence, test_command, rollback = _required_delivery_values(args)
+    item = root / ".grill" / "work-items" / args.work_id
+    if not item.is_dir():
+        raise CliFailure(EXIT_NO_GO, "NO-GO", "WORK-ITEM-MISSING", args.work_id)
+    bundle = read_local_bundle(root, item)
+    immutable = validate_metadata(bundle.metadata, args.work_id)
+    if immutable.get("type") != "hotfix":
+        raise CliFailure(EXIT_BLOCKED, "BLOCKED", "HOTFIX-TYPE-REQUIRED", args.work_id)
+    constitutional = validate_constitution_check(root, bundle.files, immutable.get("constitution", {}))
+    recorded_scope = normalized_scope(bundle.metadata, args.work_id)
+    if recorded_scope and recorded_scope != scope:
+        raise CliFailure(EXIT_BLOCKED, "BLOCKED", "HOTFIX-SCOPE-DIVERGENCE", args.work_id)
+    process = subprocess.run(test_command, cwd=root, shell=True, capture_output=True, text=True, check=False)
+    if process.returncode != 0:
+        raise CliFailure(EXIT_NO_GO, "NO-GO", "HOTFIX-TEST-FAILED", process.stderr.strip() or process.stdout.strip() or "test failed")
+    receipt = {"schema":"grill-delivery/v1","verdict":"HOTFIX-GO","mode":"hotfix","work_id":args.work_id,"scope":scope,"evidence":evidence,"test_command":test_command,"test_exit":0,"rollback":rollback,"constitutional":constitutional,"global_inputs":[],"post_ship":["reconcile","audit-documentation"]}
+    atomic_write(root, item / "DELIVERY-AUDIT.md", ("# Delivery Audit\n\n```json\n" + json.dumps(receipt, ensure_ascii=False, sort_keys=True, indent=2) + "\n```\n").encode())
+    return receipt, EXIT_OK
+
+
 def validate_metadata(metadata: dict[str, Any], expected_work_id: str | None = None) -> dict[str, Any]:
     immutable = metadata.get("immutable")
     if not isinstance(immutable, dict) or metadata.get("immutable_sha256") != hash_bytes(canonical(immutable)):
@@ -1073,6 +1114,14 @@ def build_parser() -> JsonParser:
     migrate_parser.add_argument("--work-id")
     migrate_parser.add_argument("--base-ref")
     migrate_parser.add_argument("--apply", action="store_true")
+    hotfix_parser = subparsers.add_parser("hotfix-go")
+    hotfix_parser.add_argument("root")
+    hotfix_parser.add_argument("--work-id", required=True)
+    hotfix_parser.add_argument("--mode", default="hotfix")
+    hotfix_parser.add_argument("--scope", action="append", required=True)
+    hotfix_parser.add_argument("--evidence", action="append", required=True)
+    hotfix_parser.add_argument("--test-command", required=True)
+    hotfix_parser.add_argument("--rollback", required=True)
     return parser
 
 
@@ -1084,6 +1133,7 @@ def main(argv: list[str] | None = None) -> int:
             "audit": audit_command,
             "reconcile": reconcile_command,
             "migrate": migrate_command,
+            "hotfix-go": hotfix_go_command,
         }
         payload, exit_code = handlers[args.command](args)
     except CliFailure as failure:

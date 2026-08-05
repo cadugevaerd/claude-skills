@@ -143,3 +143,16 @@ A migração copia arquivos planos, `docs/adr|adrs` e `handoffs` para staging, p
 A ordem vem de `execution-order`, não dos números de fase. Para `GO`, a fase selecionada deve ser a primeira incompleta, ter predecessores completos, nenhum BL aberto e handoff WHAT/WHY exclusivo. `PLAN-CONTEXT.md`, ADRs e `CONTEXT.md` fornecem HOW.
 
 Após auditoria `GO` e entrega do handoff, emita `PLAN_ONLY_STOP` e pare. Agentes externos executarão `specify|plan` em outro ciclo. Após ship, marque a fase `complete`, reaudite e só então reconcilie globalmente.
+
+## Delivery First / hotfix-fast
+
+Feature e fix continuam estritamente plan-only. A única faixa executável é `hotfix-go`, que emite `HOTFIX-GO` somente com: tipo hotfix, escopo relativo fechado, evidência/reprodução, comando de teste da correção que retorna zero, rollback explícito e gate constitucional aprovado. Ela não lê ROADMAP, DECISION-BACKLOG, PLAN-CONTEXT ou workflow global para decidir o ship, e falha fechada em qualquer ambiguidade.
+
+```bash
+python3 .../grill_workspace.py hotfix-go ROOT --work-id ID \
+  --scope src/api.py --evidence "reprodução: HTTP 500" \
+  --test-command "python3 -m unittest tests/test_hotfix.py" \
+  --rollback "reverter commit e restaurar migração"
+```
+
+O receipt `DELIVERY-AUDIT.md` registra escopo, evidência, teste, rollback e a obrigação de reconcile + auditoria documental completa pós-ship. `--mode` diferente de `hotfix`, ausência de qualquer requisito, divergência de escopo ou conflito constitucional bloqueia.

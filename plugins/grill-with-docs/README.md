@@ -46,6 +46,16 @@ python3 "$CORE" migrate "$PWD" --type fix --slug migracao --apply
 - IDs locais tornam-se `<work-id>/<ID>` na projeção.
 - A sessão encerra em `PLAN_ONLY_STOP`, antes de implementação.
 
+## Delivery First / hotfix-fast
+
+`feature` e `fix` permanecem plan-only. `hotfix-go` é executável apenas com escopo fechado, evidência/reprodução, teste verde da correção, rollback e Constituição sem conflito. A faixa não depende de ROADMAP/BL/DQ/WORKFLOW globais irrelevantes, grava receipt local e exige reconcile + auditoria documental pós-ship.
+
+```bash
+python3 "$CORE" hotfix-go "$PWD" --work-id hotfix-id --scope src/api.py \
+  --evidence "reprodução: erro 500" --test-command "python3 -m unittest tests/test_hotfix.py" \
+  --rollback "reverter commit"
+```
+
 ## Exit codes
 
 | Código | Resultado |

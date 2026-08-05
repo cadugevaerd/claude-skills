@@ -123,3 +123,8 @@ Após pacote válido, auditoria `GO` e handoff entregue:
 5. deixar ship e reconciliação para ciclos externos.
 
 Hooks `SessionStart|SubagentStart` são somente contexto read-only e nunca inicializam work items.
+
+
+## Delivery First
+
+`hotfix-go` é a exceção executável: exige scope fechado, evidência, teste de correção verde, rollback e gate constitucional; rejeita feature/fix, escopo divergente e qualquer conflito. Não consulta projeções globais irrelevantes. O receipt local deve ser reconciliado e auditado documentalmente após o ship.
