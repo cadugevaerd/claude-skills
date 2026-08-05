@@ -1,4 +1,4 @@
-# grill-with-docs v2
+# grill-with-docs v2.1.1 — Delivery First
 
 Plugin plan-only para entrevistar decisões arquiteturais sem colisão entre worktrees.
 
@@ -8,11 +8,22 @@ feature/fix/hotfix → .grill/work-items/<work-id>/ → audit → PLAN_ONLY_STOP
 ship externo → complete/GO ─────────────────────────────┴→ reconcile → .grill/global/
 ```
 
+## Hotfix-fast / incidente
+
+```bash
+python3 "$CORE" hotfix "$PWD" --slug auth-timeout --scope src/auth.py --reproduction "curl /login returns 500" --evidence "incident-2026-08-05.log" --correction-test "tests/test_auth.py::test_timeout" --rollback "revert commit X" --constitution-evidence evidence/constitution.txt --test-command "python3 -c 'raise SystemExit(0)'" --test-timeout 30
+python3 "$CORE" hotfix-go "$PWD" --work-id <work-id>
+python3 "$CORE" audit "$PWD" --work-id <work-id>
+```
+
+``hotfix` retorna HOTFIX-PREPARED; `hotfix-go` revalida e executa o teste antes de emitir HOTFIX-GO. HOTFIX-GO é autocontido e fail-closed; não exige ROADMAP/BL/DQ/reconciliação para segurança. Full audit e reconciliação são pós-ship. Feature/fix continuam `PLAN_ONLY_STOP`.
+
 ## Início rápido
 
 ```bash
-CORE="${PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/skills/grill-with-docs/scripts/grill_workspace.py"
+CORE="$PLUGIN_ROOT/skills/grill-with-docs/scripts/grill_workspace.py"
 python3 "$CORE" init "$PWD" --type feature --slug minha-feature
+python3 "$CORE" hotfix-go "$PWD" --work-id <work-id>
 python3 "$CORE" audit "$PWD" --work-id <work-id>
 ```
 
@@ -45,16 +56,6 @@ python3 "$CORE" migrate "$PWD" --type fix --slug migracao --apply
 - O global é projeção determinística; nunca é fonte de verdade.
 - IDs locais tornam-se `<work-id>/<ID>` na projeção.
 - A sessão encerra em `PLAN_ONLY_STOP`, antes de implementação.
-
-## Delivery First / hotfix-fast
-
-`feature` e `fix` permanecem plan-only. `hotfix-go` é executável apenas com escopo fechado, evidência/reprodução, teste verde da correção, rollback e Constituição sem conflito. A faixa não depende de ROADMAP/BL/DQ/WORKFLOW globais irrelevantes, grava receipt local e exige reconcile + auditoria documental pós-ship.
-
-```bash
-python3 "$CORE" hotfix-go "$PWD" --work-id hotfix-id --scope src/api.py \
-  --evidence "reprodução: erro 500" --test-command "python3 -m unittest tests/test_hotfix.py" \
-  --rollback "reverter commit"
-```
 
 ## Exit codes
 

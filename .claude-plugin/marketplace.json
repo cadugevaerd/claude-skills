@@ -13,18 +13,35 @@
       "description": "Estilo de saída estável, técnico e conciso para Claude Code; sempre ativo enquanto habilitado.",
       "source": "./plugins/caveman-stable",
       "version": "1.0.0",
-      "author": {"name": "Carlos Araujo"},
+      "author": {
+        "name": "Carlos Araujo"
+      },
       "category": "development",
-      "tags": ["output-style", "concise", "technical", "stable"]
+      "tags": [
+        "output-style",
+        "concise",
+        "technical",
+        "stable"
+      ]
     },
     {
       "name": "grill-with-docs",
-      "description": "Isola um grill por feature/fix/hotfix em .grill/work-items, aplica gate constitucional read-only e encerra em PLAN_ONLY_STOP; após ship externo e fase complete/GO, permite reconciliar o ROADMAP global determinístico.",
+      "description": "Entrega hotfixes por uma faixa rápida e verificável (HOTFIX-PREPARED → HOTFIX-GO), mantendo planejamento arquitetural em PLAN_ONLY_STOP.",
       "source": "./plugins/grill-with-docs",
-      "version": "2.0.1",
-      "author": {"name": "Carlos Araujo"},
+      "version": "2.1.1",
+      "author": {
+        "name": "Carlos Araujo"
+      },
       "category": "development",
-      "tags": ["architecture", "adr", "worktree", "constitution", "roadmap", "audit", "reconciliation"]
+      "tags": [
+        "architecture",
+        "adr",
+        "worktree",
+        "constitution",
+        "roadmap",
+        "audit",
+        "reconciliation"
+      ]
     },
     {
       "name": "backlog",
@@ -213,27 +230,53 @@
       "description": "Entrevista curta para projetar um agente prompt-only e entrega um system prompt de até 8.000 caracteres, pronto para copiar e colar.",
       "source": "./plugins/prompt-only-agent",
       "version": "1.0.1",
-      "author": {"name": "Carlos Araujo"},
+      "author": {
+        "name": "Carlos Araujo"
+      },
       "category": "development",
-      "tags": ["prompt-engineering", "system-prompt", "agent", "interview", "prompt-only"]
+      "tags": [
+        "prompt-engineering",
+        "system-prompt",
+        "agent",
+        "interview",
+        "prompt-only"
+      ]
     },
     {
       "name": "qa-planner",
       "description": "Planeja QA para uma branch: analisa requisitos, define estratégia e cria cenários rastreáveis em QA.md, sem executar testes. Outra IA executa o plano e registra evidências em QA-RESULTS.md.",
       "source": "./plugins/qa-planner",
       "version": "1.0.0",
-      "author": {"name": "Carlos Araujo"},
+      "author": {
+        "name": "Carlos Araujo"
+      },
       "category": "development",
-      "tags": ["qa", "test-plan", "test-cases", "quality-assurance", "regression", "handoff"]
+      "tags": [
+        "qa",
+        "test-plan",
+        "test-cases",
+        "quality-assurance",
+        "regression",
+        "handoff"
+      ]
     },
     {
       "name": "whatsapp-business-platform",
       "description": "Projeta e opera integrações Meta WhatsApp Business Platform, incluindo Cloud API, Technology Provider, Embedded Signup v4 e Coexistence.",
       "source": "./plugins/whatsapp-business-platform",
       "version": "1.0.0",
-      "author": {"name": "Carlos Araujo"},
+      "author": {
+        "name": "Carlos Araujo"
+      },
       "category": "development",
-      "tags": ["whatsapp", "meta", "cloud-api", "technology-provider", "embedded-signup", "coexistence"]
+      "tags": [
+        "whatsapp",
+        "meta",
+        "cloud-api",
+        "technology-provider",
+        "embedded-signup",
+        "coexistence"
+      ]
     }
   ]
 }
