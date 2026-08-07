@@ -28,7 +28,7 @@
       "name": "grill-with-docs",
       "description": "Entrega hotfixes por uma faixa rápida e verificável; reconciliação incremental por work item com receipts fail-closed.",
       "source": "./plugins/grill-with-docs",
-      "version": "2.2.0",
+      "version": "2.2.1",
       "author": {
         "name": "Carlos Araujo"
       },
