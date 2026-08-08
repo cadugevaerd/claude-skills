@@ -123,6 +123,8 @@ Reinicie o Claude Code (ou abra uma nova sessão).
 /grill-with-docs iniciar brownfield
 /grill-with-docs retomar ./docs
 /grill-with-docs auditar ./docs
+/grill-with-docs status ROOT
+/grill-with-docs checkpoint ROOT --work-id ID --step specify --state in-progress
 /grillme-langgraph     # design LangGraph — versão técnica
 /grillme-gestor        # design LangGraph — versão para o gestor
 /rag-kag-decision <caso de uso, fontes de dados, risco e exemplos de perguntas>
@@ -161,9 +163,9 @@ Cada `feature|fix|hotfix` usa branch/worktree dedicada e um namespace próprio:
 └── handoffs/
 ```
 
-`WORKFLOW.md` e `.specify/memory/constitution.md` permanecem project-wide. A Constituição é opcional; quando presente, é read-only, hashada e mapeada por cláusula com evidência e justificativa. Nenhum ADR pode dispensá-la ou enfraquecê-la.
+`WORKFLOW.md` e `.specify/memory/constitution.md` permanecem project-wide. Antes de `init`, ausência da Constituição é bootstrap pendente; `init` cria o arquivo gerenciado sem clobber e, depois disso, ele é read-only, hashado e mapeado por cláusula com evidência e justificativa. Nenhum ADR pode dispensá-lo ou enfraquecê-lo.
 
-`grill_workspace.py` fornece `init`, `audit`, `reconcile` e `migrate`. A entrevista segue `audit → PLAN_ONLY_STOP`; depois do ship externo, marque a fase como `complete`, reaudite com `GO` e só então use o preview de reconciliação (read-only) ou `--apply`, que exige branch de integração limpa e gera somente `.grill/global/ROADMAP.md` e `AUDIT.md`. IDs locais são qualificados como `<work-id>/<ID>`. Hooks continuam read-only. A entrevista não executa `specify|plan`, implementa código ou faz merge.
+`grill_workspace.py` fornece `init`, `status`, `checkpoint`, `audit`, `reconcile` e `migrate`. A entrevista segue `audit → PLAN_ONLY_STOP`; depois do ship externo, marque a fase como `complete`, reaudite com `GO` e só então use o preview de reconciliação (read-only) ou `--apply`, que exige branch de integração limpa e gera somente `.grill/global/ROADMAP.md` e `AUDIT.md`. IDs locais são qualificados como `<work-id>/<ID>`. Hooks continuam read-only. A entrevista não executa `specify|plan`, implementa código ou faz merge.
 
 ### backlog
 
