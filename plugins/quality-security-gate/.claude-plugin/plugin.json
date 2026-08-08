@@ -1,0 +1,6 @@
+{
+  "name": "quality-security-gate",
+  "version": "0.1.0",
+  "description": "Local, deterministic, fail-closed quality and security governance gate.",
+  "author": {"name": "Carlos Araujo"}
+}
