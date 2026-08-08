@@ -17,6 +17,7 @@ Coleção de [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) 
 | **`langsmith-evals`** | Prompt Engineering, engenharia e auditoria LangSmith-first. Inclui `langsmith-prompt-engineer`, `langsmith-evals-engineer` e `langsmith-evals-auditor`, fixados em `sonnet`. |
 | **`prompt-only-agent`** | Faz uma entrevista curta, uma pergunta por vez, e entrega um system prompt em Markdown de até **8.000 caracteres**, pronto para copiar e colar para um agente sem ferramentas. |
 | **`qa-planner`** | Analisa requisitos e o diff da branch, define estratégia e cria `QA.md` rastreável para outra IA executar — sem rodar testes. |
+| **`quality-security-gate`** | Analisa qualidade/segurança localmente, fail-closed, com risco P1/P2/P3, estado auditável e módulos MOD-001..012. |
 | **`whatsapp-business-platform`** | Projeta e opera integrações oficiais Meta: Cloud API, Technology Provider, Embedded Signup v4, Coexistence App+API, múltiplas WABAs/números, webhooks e tokens. |
 
 ## Instalação
@@ -45,9 +46,16 @@ claude plugin install langsmith-evals@claude-skills
 claude plugin install prompt-only-agent@claude-skills
 claude plugin install qa-planner@claude-skills
 claude plugin install whatsapp-business-platform@claude-skills
+claude plugin install quality-security-gate@claude-skills
 ```
 
-Ou dentro de uma sessão do Claude Code:
+Uso local (o único comando que grava estado é `analyze`):
+
+```bash
+python3 plugins/quality-security-gate/scripts/quality_gatectl.py analyze --root "$PWD" --init --json
+python3 plugins/quality-security-gate/scripts/quality_gatectl.py status --root "$PWD" --json
+```
+
 
 ```
 /plugin marketplace add cadugevaerd/claude-skills
