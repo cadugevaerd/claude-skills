@@ -36,7 +36,7 @@ claude plugin install backlog@claude-skills
 claude plugin install caveman-stable@claude-skills
 claude plugin install code-review-cadu@claude-skills
 claude plugin install code-debug@claude-skills
-claude plugin install grill-with-docs@claude-skills
+# grill-with-docs: use o marketplace dedicado na seção abaixo
 claude plugin install grillme-gestor@claude-skills
 claude plugin install grillme-langgraph@claude-skills
 claude plugin install rag-kag-decision@claude-skills
@@ -48,6 +48,17 @@ claude plugin install qa-planner@claude-skills
 claude plugin install whatsapp-business-platform@claude-skills
 claude plugin install quality-security-gate@claude-skills
 ```
+
+## Instalação do `grill-with-docs`
+
+O `grill-with-docs` é distribuído pelo marketplace público dedicado:
+
+```bash
+claude plugin marketplace add cadugevaerd/grill-with-docs
+claude plugin install grill-with-docs@grill-with-docs
+```
+
+Fonte: https://github.com/cadugevaerd/grill-with-docs
 
 Uso local (o único comando que grava estado é `analyze`):
 
