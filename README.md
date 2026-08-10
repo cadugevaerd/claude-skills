@@ -49,6 +49,11 @@ claude plugin install whatsapp-business-platform@claude-skills
 claude plugin install quality-security-gate@claude-skills
 ```
 
+O comando de instalação do `grill-with-docs` continua sendo
+`claude plugin install grill-with-docs@claude-skills`, mas o pacote agora é
+baixado do repositório público dedicado:
+https://github.com/cadugevaerd/grill-with-docs
+
 Uso local (o único comando que grava estado é `analyze`):
 
 ```bash
