@@ -31,7 +31,8 @@
         "source": "git-subdir",
         "url": "https://github.com/cadugevaerd/grill-with-docs.git",
         "path": "plugin",
-        "ref": "v2.4.1"
+        "ref": "v2.4.1",
+        "sha": "c6a9b0708f737dd9f13a3ca98c3b5fa2a00c4cbf"
       },
       "version": "2.4.1",
       "author": {
