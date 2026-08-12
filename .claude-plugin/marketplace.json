@@ -289,9 +289,34 @@
       "description": "Gate local, determinístico e fail-closed de qualidade e segurança, com estado auditável e módulos MOD-001..012.",
       "source": "./plugins/quality-security-gate",
       "version": "0.1.0",
-      "author": {"name": "Carlos Araujo"},
+      "author": {
+        "name": "Carlos Araujo"
+      },
       "category": "development",
-      "tags": ["quality", "security", "governance", "risk", "audit"]
+      "tags": [
+        "quality",
+        "security",
+        "governance",
+        "risk",
+        "audit"
+      ]
+    },
+    {
+      "name": "levantamento-requisitos",
+      "description": "Levanta requisitos verificáveis e entrega um handoff pronto para implementar sem suposições ocultas.",
+      "source": "./plugins/levantamento-requisitos",
+      "version": "1.0.0",
+      "author": {
+        "name": "Carlos Araujo"
+      },
+      "category": "development",
+      "tags": [
+        "requirements",
+        "discovery",
+        "acceptance-criteria",
+        "handoff",
+        "planning"
+      ]
     }
   ]
 }

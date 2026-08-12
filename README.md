@@ -17,6 +17,7 @@ Coleção de [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) 
 | **`langsmith-evals`** | Prompt Engineering, engenharia e auditoria LangSmith-first. Inclui `langsmith-prompt-engineer`, `langsmith-evals-engineer` e `langsmith-evals-auditor`, fixados em `sonnet`. |
 | **`prompt-only-agent`** | Faz uma entrevista curta, uma pergunta por vez, e entrega um system prompt em Markdown de até **8.000 caracteres**, pronto para copiar e colar para um agente sem ferramentas. |
 | **`qa-planner`** | Analisa requisitos e o diff da branch, define estratégia e cria `QA.md` rastreável para outra IA executar — sem rodar testes. |
+| **`levantamento-requisitos`** | Levanta evidências, lacunas, decisões, critérios de aceite e riscos; entrega handoff verificável antes da implementação. |
 | **`quality-security-gate`** | Analisa qualidade/segurança localmente, fail-closed, com risco P1/P2/P3, estado auditável e módulos MOD-001..012. |
 | **`whatsapp-business-platform`** | Projeta e opera integrações oficiais Meta: Cloud API, Technology Provider, Embedded Signup v4, Coexistence App+API, múltiplas WABAs/números, webhooks e tokens. |
 
@@ -45,6 +46,7 @@ claude plugin install facilitador-reunioes@claude-skills
 claude plugin install langsmith-evals@claude-skills
 claude plugin install prompt-only-agent@claude-skills
 claude plugin install qa-planner@claude-skills
+claude plugin install levantamento-requisitos@claude-skills
 claude plugin install whatsapp-business-platform@claude-skills
 claude plugin install quality-security-gate@claude-skills
 ```
@@ -144,6 +146,7 @@ Reinicie o Claude Code (ou abra uma nova sessão).
 /langsmith-evals <sistema ou mudança a avaliar; prompt|engineer|audit>
 /prompt-only-agent <ideia ou objetivo do agente prompt-only>
 /qa-planner branch=feat/oauth base=main
+/levantamento-requisitos Nova integração de pedidos source=docs/produto.md
 /whatsapp-business-platform modo=provider planejar onboarding multiempresa
 /whatsapp-business-platform modo=coexistence verificar App manual + Cloud API
 ```
@@ -217,6 +220,10 @@ Executa somente as três primeiras etapas de QA: análise de requisitos,
 planejamento dos testes e criação de cenários. Analisa a branch e grava um `QA.md`
 rastreável no local adequado do repositório-alvo, sem executar testes. Outra IA
 consome o plano e registra resultados reais em `QA-RESULTS.md`.
+
+### levantamento-requisitos
+
+Skill discovery-only para evitar requisitos implícitos antes de implementar. Estrutura evidências, escopo, requisitos, critérios de aceite, decisões, perguntas priorizadas, riscos e o handoff mínimo. Só emite `READY` sem pergunta P0 aberta.
 
 ### whatsapp-business-platform
 

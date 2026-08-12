@@ -1,0 +1,8 @@
+{
+  "name": "levantamento-requisitos",
+  "version": "1.0.0",
+  "description": "Levanta requisitos verificáveis e entrega um handoff pronto para implementar sem suposições ocultas.",
+  "author": {
+    "name": "Carlos Araujo"
+  }
+}
