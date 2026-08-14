@@ -1,0 +1,6 @@
+{
+  "name": "langgraph-architecture",
+  "version": "1.0.0",
+  "description": "Planeja e revisa arquiteturas LangGraph com dois subagentes Opus isolados.",
+  "author": {"name": "Carlos Araujo"}
+}
