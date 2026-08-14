@@ -15,6 +15,7 @@ Coleção de [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) 
 | **`modelos-custo-beneficio`** | Consulta OpenRouter e lista até 5 candidatos para Model Engineering Eval, com inteligência Artificial Analysis >35 via OpenRouter Benchmarks, reasoning controlável, throughput p75/p50 ≥60 t/s e variantes `:exacto`/`:nitro`; não decide runtime. |
 | **`facilitador-reunioes`** | Cria convites, objetivos claros, pré-briefing, roteiro de condução e próximos passos para reuniões objetivas. |
 | **`langsmith-evals`** | Prompt Engineering, engenharia e auditoria LangSmith-first. Inclui `langsmith-prompt-engineer`, `langsmith-evals-engineer` e `langsmith-evals-auditor`, fixados em `sonnet`. |
+| **`langgraph-architecture`** | Planeja arquiteturas LangGraph e revisa repositórios existentes por duas skills que delegam obrigatoriamente a `langgraph-architect` e `langgraph-reviewer`, ambos `opus`/`max` em worktrees isolados. |
 | **`prompt-only-agent`** | Faz uma entrevista curta, uma pergunta por vez, e entrega um system prompt em Markdown de até **8.000 caracteres**, pronto para copiar e colar para um agente sem ferramentas. |
 | **`qa-planner`** | Analisa requisitos e o diff da branch, define estratégia e cria `QA.md` rastreável para outra IA executar — sem rodar testes. |
 | **`levantamento-requisitos`** | Levanta evidências, lacunas, decisões, critérios de aceite e riscos; entrega handoff verificável antes da implementação. |
@@ -44,6 +45,7 @@ claude plugin install rag-kag-decision@claude-skills
 claude plugin install modelos-custo-beneficio@claude-skills
 claude plugin install facilitador-reunioes@claude-skills
 claude plugin install langsmith-evals@claude-skills
+claude plugin install langgraph-architecture@claude-skills
 claude plugin install prompt-only-agent@claude-skills
 claude plugin install qa-planner@claude-skills
 claude plugin install levantamento-requisitos@claude-skills
@@ -144,6 +146,8 @@ Reinicie o Claude Code (ou abra uma nova sessão).
 /modelos-custo-beneficio throughput_min=60 intelligence_min=35 input=text,image tool_calls=true structured_outputs=true
 /facilitador-reunioes <tema, participantes, decisão esperada, contexto>
 /langsmith-evals <sistema ou mudança a avaliar; prompt|engineer|audit>
+/langgraph-architecture:langgraph-architecture-plan repo=. planeje um chatbot corporativo com RAG
+/langgraph-architecture:langgraph-repository-review repo=. revise esta implementação e liste os problemas
 /prompt-only-agent <ideia ou objetivo do agente prompt-only>
 /qa-planner branch=feat/oauth base=main
 /levantamento-requisitos Nova integração de pedidos source=docs/produto.md
@@ -231,6 +235,9 @@ Separa App ID, Business ID, WABA ID, Phone Number ID e número E.164; orienta ve
 
 ### langsmith-evals
 Usa LangSmith como control plane para prompts, Datasets, Examples, Experiments, Traces e Feedback, mantendo pytest e oráculos determinísticos no repositório. O `langsmith-prompt-engineer` cria candidatos versionados e executa comparações pareadas; o `langsmith-evals-engineer` implementa e executa evals e backtests; o `langsmith-evals-auditor` revisa a evidência sem editar artefatos e emite `GO`, `NO-GO` ou `BLOCKED`. A separação evita self-certification. Os tres subagentes declaram `model: sonnet` no frontmatter.
+
+### langgraph-architecture
+Distribui `/langgraph-architecture:langgraph-architecture-plan` e `/langgraph-architecture:langgraph-repository-review`. A primeira delega ao `langgraph-architect`, que cria somente `LANGGRAPH-ARCHITECTURE-PLAN.md`; a segunda delega ao `langgraph-reviewer`, read-only, que lista findings comprovados sem corrigir o repositório. Ambos usam `model: opus`, `effort: max` e `isolation: worktree`. O contrato mínimo cobre state, agent/tools/quality gate, router condicional, checkpointer/thread, Store/user, contexto dinâmico, trimming/summarization, RAG/grounding, limites/HITL, observabilidade e evals de resposta, trajetória e node.
 
 ### grillme-langgraph / grillme-gestor
 
