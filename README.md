@@ -16,7 +16,7 @@ Coleção de [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) 
 | **`facilitador-reunioes`** | Cria convites, objetivos claros, pré-briefing, roteiro de condução e próximos passos para reuniões objetivas. |
 | **`langsmith-evals`** | Prompt Engineering, engenharia e auditoria LangSmith-first. Inclui `langsmith-prompt-engineer`, `langsmith-evals-engineer` e `langsmith-evals-auditor`, fixados em `sonnet`. |
 | **`langgraph-architecture`** | Planeja arquiteturas LangGraph e revisa repositórios existentes por duas skills que delegam obrigatoriamente a `langgraph-architect` e `langgraph-reviewer`, ambos `opus`/`max` em worktrees isolados. |
-| **`precode-system-foundations`** | Inspeciona contexto e persiste estado corrigível: módulos necessários/existentes/ausentes/inválidos/não-verificáveis, recomendações MVP/go-live/futuro e evidências sem transformar inferência em decisão. |
+| **`precode-system-foundations`** | Inspeciona contexto, exibe a decomposição do produto (modular ou módulo único justificado) e persiste MVP/go-live/futuro auditáveis sem transformar inferência em decisão. |
 | **`prompt-only-agent`** | Faz uma entrevista curta, uma pergunta por vez, e entrega um system prompt em Markdown de até **8.000 caracteres**, pronto para copiar e colar para um agente sem ferramentas. |
 | **`qa-planner`** | Analisa requisitos e o diff da branch, define estratégia e cria `QA.md` rastreável para outra IA executar — sem rodar testes. |
 | **`levantamento-requisitos`** | Levanta evidências, lacunas, decisões, critérios de aceite e riscos; entrega handoff verificável antes da implementação. |
