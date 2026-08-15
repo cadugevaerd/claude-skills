@@ -1,0 +1,8 @@
+{
+  "name": "precode-system-foundations",
+  "version": "1.0.0",
+  "description": "Cria uma fundação de produto revisável antes do código: PRD, módulos, permissões, invariantes de dados, isolamento multiusuário e fases.",
+  "author": {
+    "name": "Carlos Araujo"
+  }
+}

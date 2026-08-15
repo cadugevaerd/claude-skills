@@ -2,7 +2,7 @@
   "$schema": "https://api.claude.ai/schemas/marketplace-v1.json",
   "name": "claude-skills",
   "version": "1.0.0",
-  "description": "Marketplace de Agent Skills para Claude Code — inclui caveman-stable, backlog, code-review-cadu, code-debug, relatorio-gerencial, grill-with-docs, grillme-langgraph, grillme-gestor, rag-kag-decision, modelos-custo-benefício, facilitador-reunioes, langsmith-evals, langgraph-architecture, prompt-only-agent, qa-planner e whatsapp-business-platform",
+  "description": "Marketplace de Agent Skills para Claude Code — inclui caveman-stable, backlog, code-review-cadu, code-debug, relatorio-gerencial, grill-with-docs, grillme-langgraph, grillme-gestor, rag-kag-decision, modelos-custo-benefício, facilitador-reunioes, langsmith-evals, langgraph-architecture, precode-system-foundations, prompt-only-agent, qa-planner e whatsapp-business-platform",
   "owner": {
     "name": "Carlos Araujo",
     "email": "cadu.gevaerd@gmail.com"
@@ -335,6 +335,26 @@
         "rag",
         "memory",
         "evals"
+      ]
+    },
+    {
+      "name": "precode-system-foundations",
+      "description": "Cria uma fundação de produto revisável antes do código: PRD, módulos, permissões, invariantes de dados, isolamento multiusuário e fases.",
+      "source": "./plugins/precode-system-foundations",
+      "version": "1.0.0",
+      "author": {
+        "name": "Carlos Araujo"
+      },
+      "category": "development",
+      "tags": [
+        "prd",
+        "product-discovery",
+        "architecture",
+        "modules",
+        "authorization",
+        "database",
+        "multiuser",
+        "planning"
       ]
     }
   ]

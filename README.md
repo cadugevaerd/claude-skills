@@ -16,6 +16,7 @@ Coleção de [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) 
 | **`facilitador-reunioes`** | Cria convites, objetivos claros, pré-briefing, roteiro de condução e próximos passos para reuniões objetivas. |
 | **`langsmith-evals`** | Prompt Engineering, engenharia e auditoria LangSmith-first. Inclui `langsmith-prompt-engineer`, `langsmith-evals-engineer` e `langsmith-evals-auditor`, fixados em `sonnet`. |
 | **`langgraph-architecture`** | Planeja arquiteturas LangGraph e revisa repositórios existentes por duas skills que delegam obrigatoriamente a `langgraph-architect` e `langgraph-reviewer`, ambos `opus`/`max` em worktrees isolados. |
+| **`precode-system-foundations`** | Estrutura um produto antes do código: PRD, módulos, permissões, invariantes de dados, isolamento multiusuário e plano por fases verificáveis. |
 | **`prompt-only-agent`** | Faz uma entrevista curta, uma pergunta por vez, e entrega um system prompt em Markdown de até **8.000 caracteres**, pronto para copiar e colar para um agente sem ferramentas. |
 | **`qa-planner`** | Analisa requisitos e o diff da branch, define estratégia e cria `QA.md` rastreável para outra IA executar — sem rodar testes. |
 | **`levantamento-requisitos`** | Levanta evidências, lacunas, decisões, critérios de aceite e riscos; entrega handoff verificável antes da implementação. |
@@ -46,6 +47,7 @@ claude plugin install modelos-custo-beneficio@claude-skills
 claude plugin install facilitador-reunioes@claude-skills
 claude plugin install langsmith-evals@claude-skills
 claude plugin install langgraph-architecture@claude-skills
+claude plugin install precode-system-foundations@claude-skills
 claude plugin install prompt-only-agent@claude-skills
 claude plugin install qa-planner@claude-skills
 claude plugin install levantamento-requisitos@claude-skills
