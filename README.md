@@ -20,7 +20,7 @@ Coleção de [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) 
 | **`prompt-only-agent`** | Faz uma entrevista curta, uma pergunta por vez, e entrega um system prompt em Markdown de até **8.000 caracteres**, pronto para copiar e colar para um agente sem ferramentas. |
 | **`qa-planner`** | Analisa requisitos e o diff da branch, define estratégia e cria `QA.md` rastreável para outra IA executar — sem rodar testes. |
 | **`levantamento-requisitos`** | Levanta evidências, lacunas, decisões, critérios de aceite e riscos; entrega handoff verificável antes da implementação. |
-| **`quality-security-gate`** | Analisa qualidade/segurança localmente, fail-closed, com risco P1/P2/P3, estado auditável e módulos MOD-001..012. |
+| **`quality-security-gate`** | Audita qualidade e segurança em modo estritamente read-only, com risco P1/P2/P3, 12 investigadores isolados, gates automatizados e evidência estruturada. |
 | **`whatsapp-business-platform`** | Projeta e opera integrações oficiais Meta: Cloud API, Technology Provider, Embedded Signup v4, Coexistence App+API, múltiplas WABAs/números, webhooks e tokens. |
 
 ## Instalação
@@ -66,10 +66,11 @@ claude plugin install grill-with-docs@grill-with-docs
 
 Fonte: https://github.com/cadugevaerd/grill-with-docs
 
-Uso local (o único comando que grava estado é `analyze`):
+Uso local (todos os comandos preservam o repositório-alvo):
 
 ```bash
-python3 plugins/quality-security-gate/scripts/quality_gatectl.py analyze --root "$PWD" --init --json
+python3 plugins/quality-security-gate/scripts/quality_gatectl.py plan --root "$PWD" --json
+python3 plugins/quality-security-gate/scripts/quality_gatectl.py analyze --root "$PWD" --json
 python3 plugins/quality-security-gate/scripts/quality_gatectl.py status --root "$PWD" --json
 ```
 

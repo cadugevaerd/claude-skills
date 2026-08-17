@@ -1,8 +1,6 @@
 {
   "name": "quality-security-gate",
-  "version": "0.1.1",
-  "description": "Local, deterministic, fail-closed quality and security governance gate.",
-  "author": {
-    "name": "Carlos Araujo"
-  }
+  "version": "0.2.0",
+  "description": "Deterministic, strictly read-only risk-driven quality and security gate.",
+  "author": {"name": "Carlos Araujo"}
 }
