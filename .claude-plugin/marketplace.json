@@ -288,7 +288,7 @@
       "name": "quality-security-gate",
       "description": "Gate local, determinístico e fail-closed de qualidade e segurança, com estado auditável e módulos MOD-001..012.",
       "source": "./plugins/quality-security-gate",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "author": {
         "name": "Carlos Araujo"
       },
