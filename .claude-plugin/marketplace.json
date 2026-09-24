@@ -31,10 +31,10 @@
         "source": "git-subdir",
         "url": "https://github.com/cadugevaerd/grill-with-docs.git",
         "path": "plugin",
-        "ref": "v6.0.27",
-        "sha": "657e2baf65b7d9f03307c8fc4e0a004bb8313c5f"
+        "ref": "v6.0.28",
+        "sha": "e1e46fae6410d5e7edaee966d8dbac4a3432ec4b"
       },
-      "version": "6.0.27",
+      "version": "6.0.28",
       "author": {
         "name": "Carlos Araujo"
       },
