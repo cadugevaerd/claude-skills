@@ -21,6 +21,7 @@ Coleção de [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) 
 | **`qa-planner`** | Analisa requisitos e o diff da branch, define estratégia e cria `QA.md` rastreável para outra IA executar — sem rodar testes. |
 | **`levantamento-requisitos`** | Levanta evidências, lacunas, decisões, critérios de aceite e riscos; entrega handoff verificável antes da implementação. |
 | **`quality-security-gate`** | Audita qualidade e segurança em modo estritamente read-only, com risco P1/P2/P3, 12 investigadores isolados, gates automatizados e evidência estruturada. |
+| **`logical-data-modeling`** | Modela dados para aplicações relacionais transacionais e Analytics/BI, com integridade, governança, privacidade e plano de validação. |
 | **`whatsapp-business-platform`** | Projeta e opera integrações oficiais Meta: Cloud API, Technology Provider, Embedded Signup v4, Coexistence App+API, múltiplas WABAs/números, webhooks e tokens. |
 
 ## Instalação

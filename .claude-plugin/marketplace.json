@@ -356,6 +356,25 @@
         "multiuser",
         "planning"
       ]
+    },
+    {
+      "name": "logical-data-modeling",
+      "description": "Projeta modelos lógicos de dados transacionais relacionais e analíticos/BI, com governança, integridade e validação.",
+      "source": "./plugins/logical-data-modeling",
+      "version": "1.1.0",
+      "author": {
+        "name": "Carlos Araujo"
+      },
+      "category": "development",
+      "tags": [
+        "data-modeling",
+        "database-design",
+        "relational",
+        "analytics",
+        "bi",
+        "governance",
+        "lgpd"
+      ]
     }
   ]
 }
